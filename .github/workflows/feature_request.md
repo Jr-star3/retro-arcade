@@ -1,7 +1,7 @@
 ---
-name: Feature Request
+name: Feature request
 about: Suggest an idea for this project
-title: '[FEATURE] '
+title: ''
 labels: enhancement
 assignees: ''
 ---
@@ -15,10 +15,10 @@ A clear and concise description of what you want to happen.
 **Describe alternatives you've considered**
 A clear and concise description of any alternative solutions or features you've considered.
 
-**For new games:**
+**For new games (if applicable):**
 - Game name: [e.g. Pac-Man, Space Invaders]
-- Complexity: [Simple/Medium/Complex]
-- Estimated development time: [Your guess]
+- Game type: [e.g. Puzzle, Action, Strategy]
+- Difficulty to implement: [Simple/Medium/Complex]
 
 **Additional context**
 Add any other context or screenshots about the feature request here.
