@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Subscribe</title>
+  <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
+  <style>
+    body { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f1419 100%); color: #fff; font-family: 'Press Start 2P', monospace, cursive; min-height: 100vh; margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
+    
+    .container { display: flex; flex-direction: column; align-items: center; background: #181818; border-radius: 16px; box-shadow: 0 0 32px #0ff8, 0 0 8px #000a; padding: 40px 32px 32px 32px; margin-top: 40px; max-width: 600px; width: 100%; position: relative; overflow: hidden; }
+    
+    .container::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #0ff, #ff0, #f0f, #0ff); animation: glow 2s ease-in-out infinite alternate; }
+    
+    @keyframes glow { 0% { opacity: 0.5; } 100% { opacity: 1; } }
+    @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    
+    h1 { font-size: 32px; margin: 20px 0 10px 0; text-shadow: 2px 2px #0ff, 0 0 16px #0ff8; letter-spacing: 3px; text-align: center; animation: fadeInUp 1s ease-out; }
+    h2 { font-size: 24px; margin: 18px 0 12px 0; text-shadow: 2px 2px #0ff, 0 0 8px #0ff8; letter-spacing: 2px; text-align: center; }
+    h3 { font-size: 16px; margin: 15px 0 8px 0; color: #ff0; text-shadow: 1px 1px #ff08; letter-spacing: 1px; }
+    
+    .subtitle { font-size: 14px; color: #aaa; margin-bottom: 30px; text-align: center; letter-spacing: 1px; animation: fadeInUp 1s ease-out 0.2s both; }
+    
+    .benefits { margin: 25px 0; padding: 20px; background: rgba(0, 255, 255, 0.05); border: 1px solid #0ff3; border-radius: 12px; animation: fadeInUp 1s ease-out 0.4s both; }
+    
+    .benefit-item { display: flex; align-items: center; margin: 12px 0; font-size: 12px; line-height: 1.4; }
+    .benefit-item::before { content: '▶'; color: #0ff; margin-right: 10px; animation: pulse 2s infinite; }
+    
+    .price-highlight { font-size: 20px; color: #ff0; text-shadow: 2px 2px #ff08, 0 0 12px #ff08; margin: 20px 0; text-align: center; animation: fadeInUp 1s ease-out 0.6s both; }
+    
+    .progress-indicator { display: flex; justify-content: center; margin: 20px 0; }
+    .step { width: 12px; height: 12px; border-radius: 50%; margin: 0 8px; border: 2px solid #0ff3; transition: all 0.3s; }
+    .step.active { background: #0ff; box-shadow: 0 0 8px #0ff8; }
+    .step.completed { background: #ff0; border-color: #ff0; box-shadow: 0 0 8px #ff08; }
+    
+    .link { color: #0ff; font-size: 16px; text-decoration: none; margin-top: 18px; display: inline-block; transition: all 0.3s; padding: 8px 12px; border-radius: 6px; }
+    .link:hover { color: #ff0; text-decoration: underline; background: rgba(0, 255, 255, 0.1); transform: translateY(-2px); }
+    
+    #emailModal { display: flex; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; z-index: 1000; -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px); }
+    
+    #emailModalContent { background: #181818; padding: 32px; border-radius: 12px; box-shadow: 0 0 32px #0ff8; text-align: center; display: flex; flex-direction: column; align-items: center; max-width: 400px; width: 90%; position: relative; animation: fadeInUp 0.5s ease-out; }
+    
+    button, input[type="email"] { font-family: inherit; font-size: 16px; padding: 12px 16px; margin: 8px 0; border-radius: 8px; border: 2px solid #0ff; background: #111; color: #fff; width: 100%; max-width: 280px; box-sizing: border-box; outline: none; transition: all 0.3s; text-align: center; }
+    
+    button { background: linear-gradient(90deg, #0ff 0%, #00f 100%); color: #222; box-shadow: 0 0 8px #0ff8; cursor: pointer; margin-bottom: 0; font-weight: bold; position: relative; overflow: hidden; }
+    button:hover { background: linear-gradient(90deg, #ff0 0%, #f0f 100%); color: #111; transform: translateY(-2px); box-shadow: 0 4px 16px #0ff8; }
+    button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    
+    .loading-spinner { width: 20px; height: 20px; border: 2px solid transparent; border-top: 2px solid #222; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto; }
+    
+    input[type="email"]:focus { border-color: #ff0; box-shadow: 0 0 8px #ff08; }
+    input[type="email"].error { border-color: #f44; box-shadow: 0 0 8px #f448; }
+    input[type="email"].success { border-color: #4f4; box-shadow: 0 0 8px #4f48; }
+    
+    .success-message { color: #4f4; font-size: 12px; margin-top: 10px; animation: fadeInUp 0.3s ease-out; }
+    .error-message { color: #f44; font-size: 12px; margin-top: 10px; animation: fadeInUp 0.3s ease-out; }
+    
+    .testimonial { background: rgba(255, 255, 0, 0.05); border-left: 3px solid #ff0; padding: 15px; margin: 20px 0; border-radius: 8px; font-size: 11px; line-height: 1.5; animation: fadeInUp 1s ease-out 0.8s both; }
+    .testimonial-author { color: #ff0; margin-top: 8px; text-align: right; }
+    
+    @media (max-width: 768px) {
+      body { padding: 10px; }
+      .container { margin-top: 20px; padding: 24px 20px; }
+      h1 { font-size: 24px; }
+      h2 { font-size: 20px; }
+      .benefit-item { font-size: 11px; }
+      button, input[type="email"] { font-size: 14px; padding: 10px 12px; }
+      #emailModalContent { padding: 24px 20px; }
+    }
+    
+    @media (max-width: 480px) {
+      h1 { font-size: 20px; letter-spacing: 2px; }
+      h2 { font-size: 18px; }
+      .price-highlight { font-size: 18px; }
+      .benefit-item { font-size: 10px; margin: 8px 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎮 PREMIUM ARCADE</h1>
+    <p class="subtitle">Unlock the Ultimate Retro Gaming Experience</p>
+    
+    <div class="progress-indicator">
+      <div class="step" id="step1"></div>
+      <div class="step" id="step2"></div>
+    </div>
+    
+    <div class="benefits">
+      <h3>🚀 What You Get:</h3>
+      <div class="benefit-item">Unlimited access to ALL premium games</div>
+      <div class="benefit-item">Exclusive retro titles not found anywhere else</div>
+      <div class="benefit-item">Save your high scores and progress</div>
+      <div class="benefit-item">Ad-free gaming experience</div>
+      <div class="benefit-item">Early access to new game releases</div>
+      <div class="benefit-item">Compete on global leaderboards</div>
+      <div class="benefit-item">Monthly tournaments with prizes</div>
+    </div>
+    
+    <div class="price-highlight">
+      Only £5/month - Cancel Anytime
+    </div>
+    
+    <div class="testimonial">
+      "Best retro arcade collection I've ever seen! The nostalgia is real and the games run perfectly. Worth every penny!" 
+      <div class="testimonial-author">- RetroGamer94</div>
+    </div>
+    
+    <div id="paymentOptions" style="display:none;">
+      <button id="stripeCheckout">
+        <span id="paymentText">🔒 Secure Payment with Stripe</span>
+        <div id="paymentSpinner" class="loading-spinner" style="display:none;"></div>
+      </button>
+    </div>
+    
+    <a class="link" href="index.html">&#8592; Back to Arcade</a>
+  </div>
+  <!-- Email Modal -->
+  <div id="emailModal">
+    <div id="emailModalContent">
+      <h2>🎯 Step 1: Enter Your Email</h2>
+      <p style="font-size: 12px; color: #aaa; margin-bottom: 20px;">We'll use this for your account and receipt</p>
+      <input type="email" id="userEmail" placeholder="your.email@example.com" required autocomplete="email">
+      <button id="continueBtn">
+        <span id="continueText">Continue to Payment</span>
+        <div id="continueSpinner" class="loading-spinner" style="display:none;"></div>
+      </button>
+      <div id="emailError" class="error-message" style="display:none;"></div>
+      <div id="emailSuccess" class="success-message" style="display:none;">✓ Email verified!</div>
+    </div>
+  </div>
+  <script src="https://js.stripe.com/v3/"></script>
+  <script>
+    let customerEmail = '';
+    let isProcessing = false;
+    
+    // Auto-focus email input and handle Enter key
+    document.addEventListener('DOMContentLoaded', function() {
+      const emailInput = document.getElementById('userEmail');
+      const step1 = document.getElementById('step1');
+      const step2 = document.getElementById('step2');
+      
+      // Set initial step
+      step1.classList.add('active');
+      
+      emailInput.focus();
+      
+      emailInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && !isProcessing) {
+          document.getElementById('continueBtn').click();
+        }
+      });
+      
+      // Clear error message when user starts typing
+      emailInput.addEventListener('input', function() {
+        const error = document.getElementById('emailError');
+        const success = document.getElementById('emailSuccess');
+        error.style.display = 'none';
+        success.style.display = 'none';
+        emailInput.classList.remove('error', 'success');
+      });
+    });
+    
+    function showLoading(buttonId, textId, spinnerId) {
+      isProcessing = true;
+      document.getElementById(buttonId).disabled = true;
+      document.getElementById(textId).style.display = 'none';
+      document.getElementById(spinnerId).style.display = 'block';
+    }
+    
+    function hideLoading(buttonId, textId, spinnerId) {
+      isProcessing = false;
+      document.getElementById(buttonId).disabled = false;
+      document.getElementById(textId).style.display = 'block';
+      document.getElementById(spinnerId).style.display = 'none';
+    }
+    
+    function updateProgress(step) {
+      const step1 = document.getElementById('step1');
+      const step2 = document.getElementById('step2');
+      
+      if (step === 1) {
+        step1.classList.add('completed');
+        step1.classList.remove('active');
+        step2.classList.add('active');
+      }
+    }
+    
+    document.getElementById('continueBtn').onclick = function() {
+      if (isProcessing) return;
+      
+      const email = document.getElementById('userEmail').value.trim();
+      const error = document.getElementById('emailError');
+      const success = document.getElementById('emailSuccess');
+      const emailInput = document.getElementById('userEmail');
+      
+      error.style.display = 'none';
+      success.style.display = 'none';
+      emailInput.classList.remove('error', 'success');
+      
+      // Enhanced email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!email) {
+        error.textContent = 'Please enter your email address.';
+        error.style.display = 'block';
+        emailInput.classList.add('error');
+        return;
+      }
+      if (!emailRegex.test(email)) {
+        error.textContent = 'Please enter a valid email address.';
+        error.style.display = 'block';
+        emailInput.classList.add('error');
+        return;
+      }
+      
+      showLoading('continueBtn', 'continueText', 'continueSpinner');
+      
+      // Simulate validation delay for better UX
+      setTimeout(() => {
+        customerEmail = email;
+        localStorage.setItem('userEmail', email);
+        
+        emailInput.classList.add('success');
+        success.style.display = 'block';
+        
+        setTimeout(() => {
+          document.getElementById('emailModal').style.display = 'none';
+          document.getElementById('paymentOptions').style.display = 'block';
+          updateProgress(1);
+          hideLoading('continueBtn', 'continueText', 'continueSpinner');
+        }, 800);
+      }, 500);
+    };
+
+    // Initialize Stripe with key from server
+    let stripe;
+    
+    // Fetch Stripe publishable key from server
+    fetch('/config')
+      .then(res => res.json())
+      .then(config => {
+        stripe = Stripe(config.stripePublishableKey);
+      })
+      .catch(err => {
+        console.error('Failed to load Stripe configuration:', err);
+        alert('Payment system unavailable. Please try again later.');
+      });
+
+    document.getElementById('stripeCheckout').onclick = function() {
+      if (isProcessing) return;
+      
+      if (!customerEmail) {
+        alert('Please enter your email first.');
+        return;
+      }
+      
+      if (!stripe) {
+        alert('Payment system is loading. Please try again in a moment.');
+        return;
+      }
+      
+      showLoading('stripeCheckout', 'paymentText', 'paymentSpinner');
+      
+      fetch('/create-checkout-session', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ email: customerEmail })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.id) {
+          stripe.redirectToCheckout({ sessionId: data.id });
+        } else if (data.alreadySubscribed) {
+          localStorage.setItem('subscribed', 'true');
+          alert('🎉 You already have an active subscription! Redirecting to Arcade...');
+          window.location.href = 'arcade.html';
+        } else {
+          hideLoading('stripeCheckout', 'paymentText', 'paymentSpinner');
+          alert('❌ ' + (data.error || 'An error occurred. Please try again.'));
+        }
+      })
+      .catch(err => {
+        hideLoading('stripeCheckout', 'paymentText', 'paymentSpinner');
+        console.error('Payment error:', err);
+        alert('❌ Network error. Please check your connection and try again.');
+      });
+    };
+  </script>
+</body>
+</html>

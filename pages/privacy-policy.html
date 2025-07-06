@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - Retro Arcade</title>
+    <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
+    <style>
+        :root {
+            --neon-cyan: #00ffff;
+            --neon-pink: #ff00ff;
+            --dark-bg: #0a0a0a;
+            --card-bg: #181818;
+            --text-primary: #ffffff;
+            --text-secondary: #cccccc;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body { 
+            background: var(--dark-bg); 
+            color: var(--text-primary); 
+            font-family: 'Press Start 2P', monospace; 
+            margin: 0; 
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container { 
+            max-width: 800px; 
+            margin: 0 auto; 
+            background: var(--card-bg); 
+            border-radius: 16px; 
+            box-shadow: 0 0 32px rgba(0, 255, 255, 0.3); 
+            padding: 32px;
+            border: 2px solid var(--neon-cyan);
+        }
+
+        h1 { 
+            color: var(--neon-cyan); 
+            text-align: center; 
+            margin-bottom: 32px;
+            text-shadow: 0 0 10px var(--neon-cyan);
+        }
+
+        h2 { 
+            color: var(--neon-pink); 
+            margin-top: 32px; 
+            margin-bottom: 16px;
+            font-size: 12px;
+        }
+
+        p, li { 
+            color: var(--text-secondary); 
+            margin-bottom: 16px; 
+            font-size: 10px;
+            line-height: 1.8;
+        }
+
+        ul { 
+            padding-left: 20px; 
+        }
+
+        a { 
+            color: var(--neon-cyan); 
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        a:hover { 
+            text-shadow: 0 0 8px var(--neon-cyan);
+            color: #ffffff;
+        }
+
+        .back-button {
+            display: inline-block;
+            margin-top: 32px;
+            padding: 12px 24px;
+            background: linear-gradient(45deg, var(--neon-cyan), var(--neon-pink));
+            color: var(--dark-bg);
+            border-radius: 8px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0, 255, 255, 0.5);
+        }
+
+        .last-updated {
+            font-size: 8px;
+            color: #666;
+            text-align: center;
+            margin-top: 32px;
+            border-top: 1px solid #333;
+            padding-top: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                padding: 20px;
+            }
+            
+            h1 { font-size: 16px; }
+            h2 { font-size: 10px; }
+            p, li { font-size: 8px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Privacy Policy</h1>
+        
+        <h2>Information We Collect</h2>
+        <p>To provide our retro arcade gaming services, we collect the following information:</p>
+        <ul>
+            <li><strong>Account Information:</strong> Email address and encrypted password for user authentication</li>
+            <li><strong>Game Progress:</strong> High scores, levels completed, and gameplay statistics</li>
+            <li><strong>Subscription Data:</strong> Payment processing through Stripe (we don't store payment details)</li>
+            <li><strong>Technical Data:</strong> Login times, failed login attempts for security purposes</li>
+        </ul>
+
+        <h2>How We Use Your Information</h2>
+        <ul>
+            <li>Provide access to premium games and features</li>
+            <li>Save and sync your game progress across sessions</li>
+            <li>Process subscription payments securely</li>
+            <li>Send password reset emails when requested</li>
+            <li>Protect against unauthorized access with rate limiting</li>
+        </ul>
+
+        <h2>Data Security</h2>
+        <p>Your security is our priority:</p>
+        <ul>
+            <li>Passwords are encrypted using bcrypt with 12 salt rounds</li>
+            <li>JWT tokens for secure session management</li>
+            <li>Rate limiting to prevent brute force attacks</li>
+            <li>Account lockout after 5 failed login attempts</li>
+            <li>HTTPS encryption for all data transmission</li>
+        </ul>
+
+        <h2>Third-Party Services</h2>
+        <ul>
+            <li><strong>Stripe:</strong> Payment processing for subscriptions (see Stripe's privacy policy)</li>
+            <li><strong>Email Service:</strong> Gmail for sending password reset emails only</li>
+        </ul>
+
+        <h2>Data Retention</h2>
+        <p>We retain your data as long as your account is active. You can request account deletion by contacting us.</p>
+
+        <h2>Your Rights</h2>
+        <ul>
+            <li>Access your personal data and game progress</li>
+            <li>Update your email address</li>
+            <li>Delete your account and associated data</li>
+            <li>Manage your subscription through Stripe's customer portal</li>
+        </ul>
+
+        <h2>Cookies and Tracking</h2>
+        <p>We use minimal browser storage for:</p>
+        <ul>
+            <li>JWT authentication tokens (stored in localStorage)</li>
+            <li>Basic game preferences</li>
+            <li>No third-party tracking or analytics cookies</li>
+        </ul>
+
+        <h2>Contact Us</h2>
+        <p>For privacy questions or data requests, please <a href="contact us.html">contact us</a> or email us directly.</p>
+
+        <div class="last-updated">
+            Last updated: June 29, 2025
+        </div>
+
+        <a href="../arcade.html" class="back-button">&#8592; Back to Menu</a>
+    </div>
+</body>
+</html>

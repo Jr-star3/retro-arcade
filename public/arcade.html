@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Retro Arcade - Play 10 classic games FREE! Register once and enjoy Snake, Tetris, Breakout, Pong and more. All games free during launch period.">
+  <meta name="theme-color" content="#00ffff">
+  <title>Retro Arcade Menu</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <style>
+    /* CSS Variables for consistent theming */
+    :root {
+      --primary-color: #00ffff;
+      --primary-alpha: #00ffff88;
+      --secondary-color: #222222;
+      --accent-color: #ffff00;
+      --danger-color: #ff0044;
+      --success-color: #00ff88;
+      --background-dark: #181818;
+      --text-light: #ffffff;
+      --font-retro: 'Press Start 2P', monospace, cursive;
+      --border-radius: 8px;
+      --spacing-xs: 8px;
+      --spacing-sm: 12px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      --spacing-xl: 32px;
+      --transition-fast: 0.2s ease;
+      --transition-normal: 0.3s ease;
+      --shadow-glow: 0 0 16px;
+      --z-overlay: 10;
+      --z-modal: 100;
+    }
+
+    /* Reset and base styles */
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    body { 
+      background: var(--secondary-color); 
+      color: var(--text-light); 
+      font-family: var(--font-retro); 
+      min-height: 100vh; 
+      margin: 0; 
+      display: flex; 
+      flex-direction: column; 
+      line-height: 1.4;
+    }
+
+    /* Skip link for accessibility */
+    .skip-link {
+      position: absolute;
+      top: -40px;
+      left: 6px;
+      background: var(--primary-color);
+      color: var(--secondary-color);
+      padding: var(--spacing-sm);
+      text-decoration: none;
+      border-radius: var(--border-radius);
+      z-index: var(--z-modal);
+      transition: top var(--transition-fast);
+    }
+
+    .skip-link:focus {
+      top: 6px;
+    }
+
+    /* Loading spinner */
+    .loading-spinner {
+      display: none;
+      width: 40px;
+      height: 40px;
+      border: 4px solid var(--primary-alpha);
+      border-top: 4px solid var(--primary-color);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: var(--spacing-lg) auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Toast notifications */
+    .toast {
+      position: fixed;
+      top: var(--spacing-lg);
+      right: var(--spacing-lg);
+      background: var(--background-dark);
+      color: var(--text-light);
+      padding: var(--spacing-md) var(--spacing-lg);
+      border-radius: var(--border-radius);
+      border: 2px solid var(--primary-color);
+      box-shadow: var(--shadow-glow) var(--primary-alpha);
+      z-index: var(--z-modal);
+      transform: translateX(100%);
+      transition: transform var(--transition-normal);
+      max-width: 300px;
+      font-size: 12px;
+    }
+
+    .toast.show {
+      transform: translateX(0);
+    }
+
+    .toast.error {
+      border-color: var(--danger-color);
+      box-shadow: var(--shadow-glow) #ff004488;
+    }
+
+    .toast.success {
+      border-color: var(--success-color);
+      box-shadow: var(--shadow-glow) #00ff8888;
+    }
+
+    /* Header navigation */
+    .header-nav {
+      position: fixed;
+      top: 0;
+      right: 0;
+      padding: var(--spacing-lg);
+      display: flex;
+      gap: var(--spacing-sm);
+      z-index: var(--z-overlay);
+      flex-wrap: wrap;
+    }
+
+    .nav-btn {
+      background: linear-gradient(90deg, var(--primary-color) 0%, #0000ff 100%);
+      color: var(--secondary-color);
+      border: 2px solid var(--primary-color);
+      border-radius: var(--border-radius);
+      font-size: 14px;
+      padding: var(--spacing-sm) var(--spacing-lg);
+      box-shadow: var(--shadow-glow) var(--primary-alpha);
+      cursor: pointer;
+      font-family: inherit;
+      transition: all var(--transition-fast);
+      display: none;
+      white-space: nowrap;
+    }
+
+    .nav-btn:hover {
+      background: linear-gradient(90deg, var(--accent-color) 0%, #ff00ff 100%);
+      color: var(--secondary-color);
+      transform: translateY(-2px);
+    }
+
+    .nav-btn:focus {
+      outline: 2px solid var(--accent-color);
+      outline-offset: 2px;
+    }
+
+    .nav-btn.logout {
+      background: linear-gradient(90deg, var(--danger-color), #ff9900);
+      border-color: #ff9900;
+      color: var(--text-light);
+    }
+
+    .nav-btn.logout:hover {
+      background: linear-gradient(90deg, #ff9900, var(--danger-color));
+      color: var(--secondary-color);
+    }
+
+    /* Main container */
+    .menu-container { 
+      background: var(--background-dark); 
+      border-radius: var(--spacing-md); 
+      box-shadow: var(--shadow-glow) var(--primary-alpha), 0 0 8px #000000aa; 
+      padding: var(--spacing-xl) var(--spacing-xl) var(--spacing-md); 
+      margin: 80px auto var(--spacing-lg); 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      max-width: 600px;
+      width: 90%;
+    }
+
+    /* Launch banner animation */
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+      100% { transform: scale(1); }
+    }
+
+    h1 { 
+      margin-bottom: var(--spacing-lg); 
+      text-shadow: 2px 2px var(--primary-color), 0 0 8px var(--primary-alpha); 
+      letter-spacing: 2px; 
+      font-size: clamp(20px, 4vw, 32px);
+      text-align: center;
+    }
+
+    /* Game sections */
+    .games-section {
+      width: 100%;
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .section-title {
+      font-size: 16px;
+      color: var(--primary-color);
+      text-align: center;
+      margin-bottom: var(--spacing-md);
+      text-shadow: 0 0 8px var(--primary-alpha);
+    }
+
+    .games-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: var(--spacing-md);
+      width: 100%;
+    }
+
+    .game-link { 
+      background: var(--secondary-color); 
+      border: 2px solid var(--primary-color); 
+      border-radius: var(--border-radius); 
+      color: var(--primary-color); 
+      font-size: 14px; 
+      padding: var(--spacing-md) var(--spacing-lg); 
+      text-decoration: none; 
+      transition: all var(--transition-fast); 
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center; 
+      position: relative; 
+      font-family: inherit;
+      min-height: 60px;
+    }
+
+    .game-link:hover { 
+      background: var(--primary-color); 
+      color: var(--secondary-color); 
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px var(--primary-alpha);
+    }
+
+    .game-link:focus {
+      outline: 2px solid var(--accent-color);
+      outline-offset: 2px;
+    }
+
+    .premium-badge {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: linear-gradient(45deg, #ffd700, #ffed4e);
+      color: var(--secondary-color);
+      font-size: 10px;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-weight: bold;
+      box-shadow: 0 2px 8px rgba(255, 215, 0, 0.4);
+    }
+
+    .locked { 
+      pointer-events: none; 
+      opacity: 0.6; 
+      filter: grayscale(0.8); 
+      position: relative;
+    }
+
+    .locked::after { 
+      content: "🔒"; 
+      position: absolute; 
+      right: var(--spacing-md); 
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 20px; 
+      color: var(--accent-color); 
+    }
+
+    .locked::before {
+      content: "Premium";
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      background: var(--danger-color);
+      color: var(--text-light);
+      font-size: 8px;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    /* Support button */
+    #supportBtn {
+      background: linear-gradient(90deg, var(--accent-color) 0%, #ff00ff 100%);
+      color: var(--secondary-color);
+      border: 2px solid var(--accent-color);
+      border-radius: 12px;
+      font-size: 18px;
+      padding: var(--spacing-md) var(--spacing-xl);
+      box-shadow: var(--shadow-glow) #ffff0088;
+      cursor: pointer;
+      text-decoration: none;
+      font-family: inherit;
+      font-weight: bold;
+      transition: all var(--transition-fast);
+      margin-bottom: var(--spacing-lg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--spacing-xs);
+      min-width: 240px;
+    }
+
+    #supportBtn:hover { 
+      background: linear-gradient(90deg, var(--primary-color) 0%, #0000ff 100%); 
+      color: var(--text-light); 
+      border-color: var(--primary-color);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-glow) var(--primary-alpha);
+    }
+
+    #supportBtn:focus {
+      outline: 2px solid var(--text-light);
+      outline-offset: 2px;
+    }
+
+    .heart-icon {
+      font-size: 24px;
+      color: #ff1744;
+      animation: heartbeat 1.5s ease-in-out infinite;
+    }
+
+    @keyframes heartbeat {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+
+    /* Footer */
+    .footer {
+      width: 100%;
+      margin-top: auto;
+      padding: var(--spacing-lg) 0 var(--spacing-md);
+      background: var(--background-dark);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-top: 2px solid var(--primary-alpha);
+      box-shadow: 0 -2px var(--spacing-md) #00ffff44;
+      gap: var(--spacing-md);
+      flex-wrap: wrap;
+    }
+
+    .footer-link {
+      color: var(--text-light);
+      font-size: 12px;
+      text-decoration: none;
+      padding: var(--spacing-sm) var(--spacing-md);
+      border-radius: var(--border-radius);
+      transition: all var(--transition-normal);
+      letter-spacing: 1px;
+      font-weight: bold;
+      border: 2px solid transparent;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .footer-link:nth-child(1) {
+      background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+      box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+    }
+
+    .footer-link:nth-child(2) {
+      background: linear-gradient(135deg, #4ecdc4, #44bd87);
+      box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
+    }
+
+    .footer-link:nth-child(3) {
+      background: linear-gradient(135deg, #a55eea, #8b5cf6);
+      box-shadow: 0 4px 15px rgba(165, 94, 234, 0.3);
+    }
+
+    .footer-link:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px var(--primary-alpha);
+      border-color: var(--primary-color);
+    }
+
+    .footer-link:focus {
+      outline: 2px solid var(--accent-color);
+      outline-offset: 2px;
+    }
+
+    .footer-link:nth-child(1):hover {
+      background: linear-gradient(135deg, #ee5a24, #ff6b6b);
+    }
+
+    .footer-link:nth-child(2):hover {
+      background: linear-gradient(135deg, #44bd87, #4ecdc4);
+    }
+
+    .footer-link:nth-child(3):hover {
+      background: linear-gradient(135deg, #8b5cf6, #a55eea);
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+      .header-nav {
+        padding: var(--spacing-md);
+        gap: var(--spacing-xs);
+      }
+      
+      .nav-btn {
+        font-size: 12px;
+        padding: var(--spacing-xs) var(--spacing-sm);
+      }
+
+      .menu-container { 
+        padding: var(--spacing-md); 
+        margin-top: 100px;
+      }
+
+      .games-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .game-link { 
+        font-size: 12px; 
+        padding: var(--spacing-sm) var(--spacing-md);
+      }
+
+      #supportBtn { 
+        font-size: 14px; 
+        padding: var(--spacing-sm) var(--spacing-lg); 
+        min-width: 200px; 
+      }
+
+      .heart-icon { 
+        font-size: 20px; 
+      }
+
+      .footer-link { 
+        font-size: 10px; 
+        padding: var(--spacing-xs) var(--spacing-sm); 
+      }
+
+      .footer { 
+        gap: var(--spacing-xs); 
+      }
+    }
+
+    @media (max-width: 480px) {
+      .header-nav {
+        flex-direction: column;
+        align-items: flex-end;
+      }
+
+      .games-grid {
+        gap: var(--spacing-xs);
+      }
+    }
+
+    /* Dark mode and accessibility */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    @media (prefers-contrast: high) {
+      :root {
+        --primary-color: #ffffff;
+        --secondary-color: #000000;
+        --accent-color: #ffff00;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Skip link for accessibility -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  
+  <!-- Loading indicator -->
+  <div class="loading-spinner" id="loadingSpinner" aria-hidden="true"></div>
+  
+  <!-- Toast notification container -->
+  <div id="toastContainer" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- Header navigation -->
+  <nav class="header-nav" aria-label="User account navigation">
+    <button id="manageSubscription" class="nav-btn" aria-label="Manage your subscription">Manage Subscription</button>
+    <button id="logoutBtn" class="nav-btn logout" aria-label="Log out of your account">Logout</button>
+  </nav>
+
+  <!-- Main content -->
+  <main id="main-content" class="menu-container" role="main">
+    <h1>🕹️ Retro Arcade</h1>
+    
+    <!-- FREE LAUNCH BANNER -->
+    <div class="launch-banner" style="
+      background: linear-gradient(45deg, #00ff88, #00ffff);
+      color: #222;
+      padding: 12px 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      text-align: center;
+      font-weight: bold;
+      animation: pulse 2s infinite;
+    ">
+      🎉 FREE LAUNCH SPECIAL! All games are currently free. Premium features coming soon! 🎉
+    </div>
+    
+    <a id="supportBtn" 
+       href="https://www.paypal.com/donate/?business=STCVFETC5CSY2&no_recurring=0&item_name=Donate+for+the+help+and+maintenance+of+the+gaming+website.+&currency_code=GBP" 
+       target="_blank" 
+       rel="noopener noreferrer"
+       aria-label="Support us with a donation">
+      <span>💝 Support Us</span>
+      <span class="heart-icon" aria-hidden="true">❤️</span>
+    </a>
+
+    <!-- Free Games Section -->
+    <section class="games-section" aria-labelledby="free-games-title">
+      <h2 id="free-games-title" class="section-title">🎮 Free Games</h2>
+      <div class="games-grid" role="list">
+        <a class="game-link" href="../games/retro-game.html" role="listitem" aria-label="Play Retro Game">
+          🎯 Retro Game
+        </a>
+        <a class="game-link" href="../games/pong.html" role="listitem" aria-label="Play Pong">
+          🏓 Pong
+        </a>
+        <a class="game-link" href="../games/snake.html" role="listitem" aria-label="Play Snake">
+          🐍 Snake
+        </a>
+        <a class="game-link" href="../games/dominoes.html" role="listitem" aria-label="Play Dominoes">
+          🎲 Dominoes
+        </a>
+        <a class="game-link" href="../games/tetris.html" role="listitem" aria-label="Play Tetris">
+          🧩 Tetris
+        </a>
+      </div>
+    </section>
+
+    <!-- Premium Games Section -->
+    <section class="games-section" aria-labelledby="premium-games-title">
+      <h2 id="premium-games-title" class="section-title">⭐ Premium Games</h2>
+      <div class="games-grid" role="list">
+        <a class="game-link premium-game" href="../games/breakout.html" role="listitem" aria-label="Play Breakout - Premium game">
+          <span class="premium-badge" aria-hidden="true">PREMIUM</span>
+          🧱 Breakout
+        </a>
+        <a class="game-link premium-game" href="../games/towersofhanoi.html" role="listitem" aria-label="Play Towers of Hanoi - Premium game">
+          <span class="premium-badge" aria-hidden="true">PREMIUM</span>
+          🗼 Towers of Hanoi
+        </a>
+        <a class="game-link premium-game" href="../games/tictactoe.html" role="listitem" aria-label="Play Tic Tac Toe - Premium game">
+          <span class="premium-badge" aria-hidden="true">PREMIUM</span>
+          ⭕ Tic Tac Toe
+        </a>
+        <a class="game-link premium-game" href="../games/memory-game.html" role="listitem" aria-label="Play Memory Game - Premium game">
+          <span class="premium-badge" aria-hidden="true">PREMIUM</span>
+          🧠 Memory Game
+        </a>
+        <a class="game-link premium-game" href="../games/minesweeper.html" role="listitem" aria-label="Play Minesweeper - Premium game">
+          <span class="premium-badge" aria-hidden="true">PREMIUM</span>
+          💣 Minesweeper
+        </a>
+      </div>
+    </section>
+  </main>
+  <footer class="footer" role="contentinfo">
+    <a class="footer-link" href="pages/about-us.html" aria-label="Learn more about us">📋 About Us</a>
+    <a class="footer-link" href="pages/contact-us.html" aria-label="Contact us for support">📧 Contact Us</a>
+    <a class="footer-link" href="pages/privacy-policy.html" aria-label="Read our privacy policy">🔒 Privacy & Policy</a>
+  </footer>
+
+  <script>
+    // Modern JavaScript with improved error handling and accessibility
+    class ArcadeApp {
+      constructor() {
+        this.token = localStorage.getItem('token');
+        this.email = localStorage.getItem('userEmail');
+        this.subscribed = localStorage.getItem('subscribed') === 'true';
+        this.init();
+      }
+
+      async init() {
+        this.showLoading(true);
+        
+        try {
+          if (this.token && this.email) {
+            await this.checkUserStatus();
+          }
+          this.updateArcadeUI();
+          this.setupEventListeners();
+          this.setupKeyboardNavigation();
+        } catch (error) {
+          console.error('Initialization error:', error);
+          this.showToast('Failed to initialize app. Please refresh the page.', 'error');
+        } finally {
+          this.showLoading(false);
+        }
+      }
+
+      async checkUserStatus() {
+        try {
+          const response = await fetch('/me', {
+            headers: { 'Authorization': `Bearer ${this.token}` },
+            signal: AbortSignal.timeout(10000) // 10 second timeout
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
+
+          const data = await response.json();
+          this.subscribed = data.subscribed || false;
+          localStorage.setItem('subscribed', this.subscribed.toString());
+          
+        } catch (error) {
+          console.warn('Failed to check user status:', error.message);
+          // Don't throw - allow app to work offline/degraded
+        }
+      }
+
+      updateArcadeUI() {
+        // Update subscription button visibility
+        const manageBtn = document.getElementById('manageSubscription');
+        const logoutBtn = document.getElementById('logoutBtn');
+
+        if (this.subscribed) {
+          manageBtn.style.display = 'inline-block';
+          manageBtn.setAttribute('aria-hidden', 'false');
+        } else {
+          manageBtn.style.display = 'none';
+          manageBtn.setAttribute('aria-hidden', 'true');
+        }
+
+        // Update logout button visibility
+        if (this.token && this.email) {
+          logoutBtn.style.display = 'inline-block';
+          logoutBtn.setAttribute('aria-hidden', 'false');
+        } else {
+          logoutBtn.style.display = 'none';
+          logoutBtn.setAttribute('aria-hidden', 'true');
+        }
+
+        // Handle premium games
+        this.updatePremiumGames();
+      }
+
+      updatePremiumGames() {
+        // TEMPORARILY DISABLED FOR FREE LAUNCH
+        // During free launch, all games are accessible to everyone
+        const premiumGames = document.querySelectorAll('.premium-game');
+        
+        premiumGames.forEach(link => {
+          // Remove any existing restrictions - all games are free during launch
+          link.classList.remove('locked');
+          link.removeAttribute('aria-disabled');
+          link.setAttribute('tabindex', '0');
+          
+          // Add a temporary "FREE" badge during launch period
+          if (!link.querySelector('.launch-free-badge')) {
+            const badge = document.createElement('span');
+            badge.className = 'launch-free-badge';
+            badge.textContent = 'FREE LAUNCH';
+            badge.style.cssText = `
+              position: absolute;
+              top: 8px;
+              right: 8px;
+              background: #00ff88;
+              color: #222;
+              font-size: 8px;
+              padding: 2px 6px;
+              border-radius: 4px;
+              font-weight: bold;
+            `;
+            link.style.position = 'relative';
+            link.appendChild(badge);
+          }
+        });
+        
+        // Hide subscription management button during free launch
+        const manageBtn = document.getElementById('manageSubscription');
+        if (manageBtn) {
+          manageBtn.style.display = 'none';
+        }
+      }
+
+      setupEventListeners() {
+        // Manage Subscription button
+        document.getElementById('manageSubscription').addEventListener('click', () => {
+          this.handleManageSubscription();
+        });
+
+        // Logout button
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+          this.handleLogout();
+        });
+
+        // Support button analytics (optional)
+        document.getElementById('supportBtn').addEventListener('click', () => {
+          // Analytics or tracking can be added here
+          console.log('Support button clicked');
+        });
+      }
+
+      setupKeyboardNavigation() {
+        // Enhanced keyboard navigation
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') {
+            // Close any open modals/toasts
+            this.hideAllToasts();
+          }
+        });
+
+        // Focus management for screen readers
+        const skipLink = document.querySelector('.skip-link');
+        skipLink.addEventListener('click', (e) => {
+          e.preventDefault();
+          document.getElementById('main-content').focus();
+        });
+      }
+
+      async handleManageSubscription() {
+        // TEMPORARILY DISABLED FOR FREE LAUNCH
+        this.showToast('🎉 All games are currently FREE during our launch period! Premium features coming soon.', 'info');
+        return;
+        
+        /* ORIGINAL SUBSCRIPTION CODE - WILL BE RE-ENABLED IN PHASE 2
+        if (!this.email) {
+          this.showToast('No email found. Please log in again.', 'error');
+          return;
+        }
+
+        this.showLoading(true);
+
+        try {
+          const response = await fetch('/create-customer-portal-session', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email: this.email }),
+            signal: AbortSignal.timeout(15000) // 15 second timeout
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
+
+          const data = await response.json();
+          
+          if (data.url) {
+            this.showToast('Redirecting to subscription management...', 'success');
+            setTimeout(() => {
+              window.location.href = data.url;
+            }, 1000);
+          } else {
+            throw new Error('No URL returned from server');
+          }
+        } catch (error) {
+          console.error('Subscription management error:', error);
+          this.showToast('Could not open subscription management. Please contact support.', 'error');
+        } finally {
+          this.showLoading(false);
+        }
+        */
+      }
+
+      handleLogout() {
+        // Clear all user data
+        ['token', 'userEmail', 'subscribed'].forEach(key => {
+          localStorage.removeItem(key);
+        });
+
+        this.showToast('Logging out...', 'success');
+        
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 1000);
+      }
+
+      promptSubscription() {
+        this.showToast('Subscribe to unlock this premium game!', 'error');
+        
+        setTimeout(() => {
+          window.location.href = 'subscribe.html';
+        }, 2000);
+      }
+
+      showLoading(show) {
+        const spinner = document.getElementById('loadingSpinner');
+        if (show) {
+          spinner.style.display = 'block';
+          spinner.setAttribute('aria-hidden', 'false');
+        } else {
+          spinner.style.display = 'none';
+          spinner.setAttribute('aria-hidden', 'true');
+        }
+      }
+
+      showToast(message, type = 'info') {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        
+        toast.className = `toast ${type}`;
+        toast.textContent = message;
+        toast.setAttribute('role', 'alert');
+        
+        container.appendChild(toast);
+        
+        // Trigger animation
+        setTimeout(() => toast.classList.add('show'), 100);
+        
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+          toast.classList.remove('show');
+          setTimeout(() => {
+            if (container.contains(toast)) {
+              container.removeChild(toast);
+            }
+          }, 300);
+        }, 5000);
+      }
+
+      hideAllToasts() {
+        const toasts = document.querySelectorAll('.toast');
+        toasts.forEach(toast => {
+          toast.classList.remove('show');
+          setTimeout(() => {
+            if (toast.parentNode) {
+              toast.parentNode.removeChild(toast);
+            }
+          }, 300);
+        });
+      }
+    }
+
+    // Initialize the app when DOM is ready
+    document.addEventListener('DOMContentLoaded', () => {
+      new ArcadeApp();
+    });
+
+    // Service Worker registration for PWA features (optional)
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(registration => {
+            console.log('SW registered: ', registration);
+          })
+          .catch(registrationError => {
+            console.log('SW registration failed: ', registrationError);
+          });
+      });
+    }
+  </script>
+</body>
+</html>

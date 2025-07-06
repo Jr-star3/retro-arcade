@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pong</title>
+    <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
+    <style>
+        body {
+            background: #222;
+            color: #fff;
+            font-family: 'Press Start 2P', monospace, cursive;
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: #181818;
+            border-radius: 16px;
+            box-shadow: 0 0 32px #0ff8, 0 0 8px #000a;
+            padding: 32px 32px 16px 32px;
+            margin-top: 40px;
+        }
+        .scoreboard {
+            display: flex;
+            gap: 32px;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 12px;
+            font-size: 14px;
+            font-family: 'Press Start 2P', monospace, cursive;
+            background: #111;
+            border: 2px solid #0ff;
+            border-radius: 8px;
+            padding: 8px 24px;
+            color: #fff;
+            box-shadow: 0 0 8px #0ff4;
+        }
+        .stats-bar {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 10px;
+            background: #222;
+            border: 1px solid #0ff;
+            border-radius: 6px;
+            padding: 6px 16px;
+            color: #0ff;
+        }
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #0ff, #00aa88);
+            color: #000;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: bold;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0, 255, 255, 0.3);
+        }
+        .notification.show {
+            transform: translateX(0);
+        }
+        .achievement-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: linear-gradient(135deg, #ff0, #ffa500);
+            color: #000;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            transition: transform 0.3s ease;
+            z-index: 1001;
+            box-shadow: 0 8px 24px rgba(255, 255, 0, 0.4);
+        }
+        .achievement-popup.show {
+            transform: translate(-50%, -50%) scale(1);
+        }
+        .controls-info {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 8px;
+            font-size: 10px;
+            color: #888;
+        }
+        .power-up-indicator {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(255, 255, 0, 0.8);
+            color: #000;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: bold;
+            display: none;
+        }
+        #pongCanvas {
+            background: #111;
+            border: 6px solid #0ff;
+            border-radius: 8px;
+            image-rendering: pixelated;
+            box-shadow: 0 0 24px #0ff8;
+            margin-bottom: 16px;
+        }
+        h1 {
+            margin-bottom: 20px;
+            text-shadow: 2px 2px #0ff, 0 0 8px #0ff8;
+            letter-spacing: 2px;
+        }
+        .instructions {
+            background: #222;
+            border: 2px solid #0ff;
+            border-radius: 8px;
+            padding: 10px 18px;
+            margin-top: 10px;
+            font-size: 12px;
+            color: #fff;
+            text-align: center;
+            box-shadow: 0 0 8px #0ff4;
+        }
+        .instructions span {
+            color: #0ff;
+        }
+        a.menu-link {
+            color: #0ff;
+            display: block;
+            margin: 12px 0;
+            text-align: center;
+            text-decoration: none;
+        }
+        a.menu-link:hover {
+            text-decoration: underline;
+        }
+        footer {
+            margin-top: 24px;
+            color: #0ff;
+            font-size: 10px;
+            text-align: center;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Pong</h1>
+        <div class="stats-bar">
+            <span id="games-played">Games: 0</span>
+            <span id="win-rate">Win Rate: 0%</span>
+            <span id="highest-level">Best Level: 1</span>
+        </div>
+        <div class="scoreboard">
+            <span id="player-score">Player: 0</span>
+            <span id="ai-score">AI: 0</span>
+            <span id="level">Level: 1</span>
+        </div>
+        <div style="position: relative;">
+            <canvas id="pongCanvas" width="400" height="300"></canvas>
+            <div class="power-up-indicator" id="power-up-indicator"></div>
+        </div>
+        <div class="instructions">
+            <p>
+                Use <span>↑/↓</span> or <span>Mouse</span> to move<br>
+                First to 10 wins! <span>Space</span> to pause<br>
+                <b>Press <span>R</span> to restart</b>
+            </p>
+        </div>
+        <div class="controls-info">
+            <span>Power-ups spawn randomly</span>
+            <span>Hit corners for bonus points</span>
+        </div>
+       <a class="menu-link" href="../public/arcade.html">&#8592; Back to Menu</a>
+    </div>
+    <div class="notification" id="notification"></div>
+    <div class="achievement-popup" id="achievement-popup"></div>
+    <footer>
+        <p>&copy; 2025 Your Name</p>
+    </footer>
+    <script>
+    // Prevent arrow keys from scrolling the page
+    window.addEventListener("keydown", function(e) {
+        if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " "].includes(e.key)) {
+            e.preventDefault();
+        }
+    }, { passive: false });
+
+    window.onload = function() {
+        // Enhanced sound system
+        function playSound(frequency = 440, duration = 100, type = "square") {
+            if (!window.AudioContext) return;
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            
+            osc.type = type;
+            osc.frequency.value = frequency;
+            gain.gain.setValueAtTime(0.1, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration / 1000);
+            
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            osc.stop(ctx.currentTime + duration / 1000);
+        }
+
+        function playPowerUpSound() {
+            playSound(800, 200, "sine");
+            setTimeout(() => playSound(1000, 200, "sine"), 100);
+        }
+
+        function playAchievementSound() {
+            for (let i = 0; i < 3; i++) {
+                setTimeout(() => playSound(440 + i * 220, 300, "sine"), i * 100);
+            }
+        }
+
+        // Game elements
+        const canvas = document.getElementById('pongCanvas');
+        const ctx = canvas.getContext('2d');
+        const playerScoreEl = document.getElementById('player-score');
+        const aiScoreEl = document.getElementById('ai-score');
+        const levelEl = document.getElementById('level');
+        const gamesPlayedEl = document.getElementById('games-played');
+        const winRateEl = document.getElementById('win-rate');
+        const highestLevelEl = document.getElementById('highest-level');
+        const powerUpIndicator = document.getElementById('power-up-indicator');
+
+        // Game variables
+        const paddleHeight = 50, paddleWidth = 10;
+        const ballSize = 10;
+        let leftY, rightY, leftScore, rightScore, ballX, ballY, ballSpeedX, ballSpeedY;
+        let upPressed = false, downPressed = false;
+        let gameOver = false, gamePaused = false;
+        let level = 1;
+        let mouseY = 0;
+        let useMouseControl = false;
+        const WIN_SCORE = 10;
+
+        // Enhanced features
+        let particles = [];
+        let powerUps = [];
+        let activePowerUp = null;
+        let powerUpTimer = 0;
+        let ballTrail = [];
+        let combo = 0;
+        let lastHitTime = 0;
+        let screenShake = 0;
+        let rallyCount = 0;
+        let consecutiveHits = 0;
+
+        // Statistics
+        let stats = {
+            gamesPlayed: 0,
+            gamesWon: 0,
+            highestLevel: 1,
+            longestRally: 0,
+            cornersHit: 0,
+            powerUpsCollected: 0,
+            perfectGames: 0,
+            comebacks: 0
+        };
+
+        // Achievements
+        let achievements = {
+            firstWin: false,
+            perfectGame: false,
+            comebackKid: false,
+            speedDemon: false,
+            cornerMaster: false,
+            powerUpCollector: false,
+            marathonPlayer: false,
+            rallyMaster: false
+        };
+
+        // Load saved data
+        function loadData() {
+            const savedStats = localStorage.getItem('pongStats');
+            const savedAchievements = localStorage.getItem('pongAchievements');
+            
+            if (savedStats) {
+                stats = { ...stats, ...JSON.parse(savedStats) };
+            }
+            if (savedAchievements) {
+                achievements = { ...achievements, ...JSON.parse(savedAchievements) };
+            }
+            updateStatsDisplay();
+        }
+
+        // Save data
+        function saveData() {
+            localStorage.setItem('pongStats', JSON.stringify(stats));
+            localStorage.setItem('pongAchievements', JSON.stringify(achievements));
+        }
+
+        // Particle system
+        class Particle {
+            constructor(x, y, vx, vy, color, life) {
+                this.x = x;
+                this.y = y;
+                this.vx = vx;
+                this.vy = vy;
+                this.color = color;
+                this.life = life;
+                this.maxLife = life;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.life--;
+            }
+
+            draw() {
+                const alpha = this.life / this.maxLife;
+                ctx.globalAlpha = alpha;
+                ctx.fillStyle = this.color;
+                ctx.fillRect(this.x, this.y, 2, 2);
+                ctx.globalAlpha = 1;
+            }
+        }
+
+        // Power-up system
+        class PowerUp {
+            constructor(x, y, type) {
+                this.x = x;
+                this.y = y;
+                this.type = type;
+                this.collected = false;
+                this.pulseTimer = 0;
+            }
+
+            update() {
+                this.pulseTimer += 0.1;
+            }
+
+            draw() {
+                const pulse = Math.sin(this.pulseTimer) * 0.3 + 0.7;
+                ctx.globalAlpha = pulse;
+                
+                switch (this.type) {
+                    case 'speed':
+                        ctx.fillStyle = '#ff0000';
+                        break;
+                    case 'size':
+                        ctx.fillStyle = '#00ff00';
+                        break;
+                    case 'slow':
+                        ctx.fillStyle = '#0000ff';
+                        break;
+                }
+                
+                ctx.fillRect(this.x - 8, this.y - 8, 16, 16);
+                ctx.globalAlpha = 1;
+            }
+
+            checkCollision(ballX, ballY) {
+                const dx = this.x - (ballX + ballSize / 2);
+                const dy = this.y - (ballY + ballSize / 2);
+                return Math.sqrt(dx * dx + dy * dy) < 16;
+            }
+        }
+
+        // Create particles
+        function createParticles(x, y, color, count = 8) {
+            for (let i = 0; i < count; i++) {
+                const angle = (Math.PI * 2 * i) / count;
+                const speed = 2 + Math.random() * 3;
+                const vx = Math.cos(angle) * speed;
+                const vy = Math.sin(angle) * speed;
+                particles.push(new Particle(x, y, vx, vy, color, 30 + Math.random() * 20));
+            }
+        }
+
+        // Spawn power-up
+        function spawnPowerUp() {
+            if (powerUps.length === 0 && Math.random() < 0.003) {
+                const types = ['speed', 'size', 'slow'];
+                const type = types[Math.floor(Math.random() * types.length)];
+                const x = 100 + Math.random() * 200;
+                const y = 50 + Math.random() * 200;
+                powerUps.push(new PowerUp(x, y, type));
+            }
+        }
+
+        // Apply power-up
+        function applyPowerUp(type) {
+            activePowerUp = type;
+            powerUpTimer = 300; // 5 seconds at 60fps
+            stats.powerUpsCollected++;
+            
+            let message = '';
+            switch (type) {
+                case 'speed':
+                    ballSpeedX *= 1.5;
+                    ballSpeedY *= 1.5;
+                    message = 'Speed Boost!';
+                    break;
+                case 'size':
+                    message = 'Big Paddle!';
+                    break;
+                case 'slow':
+                    ballSpeedX *= 0.7;
+                    ballSpeedY *= 0.7;
+                    message = 'Slow Motion!';
+                    break;
+            }
+            
+            showNotification(message);
+            updatePowerUpIndicator();
+            playPowerUpSound();
+            
+            if (stats.powerUpsCollected >= 10 && !achievements.powerUpCollector) {
+                unlockAchievement('powerUpCollector', 'Power-Up Collector!', 'Collected 10 power-ups');
+            }
+        }
+
+        // Update power-up indicator
+        function updatePowerUpIndicator() {
+            if (activePowerUp && powerUpTimer > 0) {
+                let text = '';
+                switch (activePowerUp) {
+                    case 'speed': text = `Speed Boost: ${Math.ceil(powerUpTimer / 60)}s`; break;
+                    case 'size': text = `Big Paddle: ${Math.ceil(powerUpTimer / 60)}s`; break;
+                    case 'slow': text = `Slow Motion: ${Math.ceil(powerUpTimer / 60)}s`; break;
+                }
+                powerUpIndicator.textContent = text;
+                powerUpIndicator.style.display = 'block';
+            } else {
+                powerUpIndicator.style.display = 'none';
+            }
+        }
+
+        // Notifications
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('show');
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 2000);
+        }
+
+        // Achievement system
+        function unlockAchievement(key, title, description) {
+            if (!achievements[key]) {
+                achievements[key] = true;
+                showAchievement(title, description);
+                playAchievementSound();
+                saveData();
+            }
+        }
+
+        function showAchievement(title, description) {
+            const popup = document.getElementById('achievement-popup');
+            popup.innerHTML = `
+                <div style="font-size: 16px; margin-bottom: 8px;">🏆 Achievement Unlocked!</div>
+                <div style="font-size: 14px; margin-bottom: 4px;">${title}</div>
+                <div style="font-size: 10px;">${description}</div>
+            `;
+            popup.classList.add('show');
+            setTimeout(() => {
+                popup.classList.remove('show');
+            }, 3000);
+        }
+
+        // Check achievements
+        function checkAchievements() {
+            // First win
+            if (rightScore === WIN_SCORE && !achievements.firstWin) {
+                unlockAchievement('firstWin', 'First Blood!', 'Win your first game');
+            }
+            
+            // Perfect game
+            if (rightScore === WIN_SCORE && leftScore === 0 && !achievements.perfectGame) {
+                unlockAchievement('perfectGame', 'Perfect Game!', 'Win 10-0');
+                stats.perfectGames++;
+            }
+            
+            // Speed demon
+            if (rightScore === WIN_SCORE && level >= 5 && !achievements.speedDemon) {
+                unlockAchievement('speedDemon', 'Speed Demon!', 'Win on level 5+');
+            }
+            
+            // Marathon player
+            if (stats.gamesPlayed >= 50 && !achievements.marathonPlayer) {
+                unlockAchievement('marathonPlayer', 'Marathon Player!', 'Play 50+ games');
+            }
+            
+            // Corner master
+            if (stats.cornersHit >= 10 && !achievements.cornerMaster) {
+                unlockAchievement('cornerMaster', 'Corner Master!', 'Hit corners 10 times');
+            }
+            
+            // Rally master
+            if (rallyCount >= 20 && !achievements.rallyMaster) {
+                unlockAchievement('rallyMaster', 'Rally Master!', 'Achieve 20+ hit rally');
+            }
+        }
+
+        function resetPositions() {
+            leftY = canvas.height / 2 - paddleHeight / 2;
+            rightY = canvas.height / 2 - paddleHeight / 2;
+            ballX = canvas.width / 2 - ballSize / 2;
+            ballY = canvas.height / 2 - ballSize / 2;
+            ballSpeedX = (Math.random() > 0.5 ? 2.5 : -2.5) + (level - 1) * 0.5;
+            ballSpeedY = (Math.random() > 0.5 ? 1.5 : -1.5) + (level - 1) * 0.3;
+            ballTrail = [];
+            rallyCount = 0;
+            consecutiveHits = 0;
+            
+            // Reset power-ups
+            activePowerUp = null;
+            powerUpTimer = 0;
+            updatePowerUpIndicator();
+        }
+
+        function resetGameVars() {
+            leftScore = 0;
+            rightScore = 0;
+            gameOver = false;
+            gamePaused = false;
+            combo = 0;
+            updateScoreboard();
+            resetPositions();
+            
+            // Clear effects
+            particles = [];
+            powerUps = [];
+            screenShake = 0;
+        }
+
+        function updateStatsDisplay() {
+            gamesPlayedEl.textContent = `Games: ${stats.gamesPlayed}`;
+            const winRate = stats.gamesPlayed > 0 ? Math.round((stats.gamesWon / stats.gamesPlayed) * 100) : 0;
+            winRateEl.textContent = `Win Rate: ${winRate}%`;
+            highestLevelEl.textContent = `Best Level: ${stats.highestLevel}`;
+        }
+
+        function draw() {
+            // Screen shake effect
+            ctx.save();
+            if (screenShake > 0) {
+                ctx.translate(
+                    (Math.random() - 0.5) * screenShake,
+                    (Math.random() - 0.5) * screenShake
+                );
+                screenShake *= 0.9;
+                if (screenShake < 0.1) screenShake = 0;
+            }
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Animated background
+            const time = Date.now() * 0.001;
+            ctx.strokeStyle = `rgba(0, 255, 255, ${0.1 + Math.sin(time) * 0.05})`;
+            ctx.lineWidth = 1;
+            for (let i = 0; i < 5; i++) {
+                const y = (time * 50 + i * 60) % canvas.height;
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+
+            // Draw center line
+            ctx.fillStyle = "#0ff";
+            for (let i = 0; i < canvas.height; i += 20) {
+                ctx.fillRect(canvas.width / 2 - 1, i, 2, 10);
+            }
+
+            // Draw ball trail
+            for (let i = 0; i < ballTrail.length; i++) {
+                const trail = ballTrail[i];
+                const alpha = (i + 1) / ballTrail.length * 0.5;
+                ctx.globalAlpha = alpha;
+                ctx.fillStyle = "#ff0";
+                ctx.fillRect(trail.x, trail.y, ballSize * 0.7, ballSize * 0.7);
+            }
+            ctx.globalAlpha = 1;
+
+            // Draw paddles with glow effect
+            const leftPaddleHeight = activePowerUp === 'size' ? paddleHeight * 1.5 : paddleHeight;
+            const rightPaddleHeight = activePowerUp === 'size' ? paddleHeight * 1.5 : paddleHeight;
+            
+            ctx.shadowColor = "#fff";
+            ctx.shadowBlur = 10;
+            ctx.fillStyle = "#fff";
+            ctx.fillRect(10, leftY, paddleWidth, leftPaddleHeight);
+            ctx.fillRect(canvas.width - 20, rightY, paddleWidth, rightPaddleHeight);
+            ctx.shadowBlur = 0;
+
+            // Draw ball with glow
+            ctx.shadowColor = "#ff0";
+            ctx.shadowBlur = 15;
+            ctx.fillStyle = "#ff0";
+            ctx.fillRect(ballX, ballY, ballSize, ballSize);
+            ctx.shadowBlur = 0;
+
+            // Draw particles
+            particles.forEach(particle => {
+                particle.draw();
+            });
+
+            // Draw power-ups
+            powerUps.forEach(powerUp => {
+                powerUp.draw();
+            });
+
+            // Draw combo indicator
+            if (combo > 1) {
+                ctx.font = "14px 'Press Start 2P', monospace";
+                ctx.fillStyle = "#ff0";
+                ctx.fillText(`${combo}x COMBO!`, 10, 30);
+            }
+
+            // Draw pause screen
+            if (gamePaused) {
+                ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.font = "20px 'Press Start 2P', monospace";
+                ctx.fillStyle = "#fff";
+                ctx.fillText("PAUSED", 140, canvas.height / 2);
+                ctx.font = "10px 'Press Start 2P', monospace";
+                ctx.fillText("Press SPACE to continue", 80, canvas.height / 2 + 30);
+            }
+
+            // Draw game over screen
+            if (gameOver) {
+                ctx.fillStyle = "rgba(0, 0, 0, 0.8)";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                ctx.font = "18px 'Press Start 2P', monospace";
+                ctx.fillStyle = "#fff";
+                if (rightScore === WIN_SCORE) {
+                    ctx.fillText("You Win!", 110, canvas.height / 2 - 20);
+                } else {
+                    ctx.fillText("AI Wins!", 120, canvas.height / 2 - 20);
+                }
+                
+                ctx.font = "12px 'Press Start 2P', monospace";
+                ctx.fillStyle = "#0ff";
+                ctx.fillText("Level: " + level, 130, canvas.height / 2 + 10);
+                ctx.fillText("Rally: " + stats.longestRally, 120, canvas.height / 2 + 30);
+                
+                ctx.font = "10px 'Press Start 2P', monospace";
+                ctx.fillStyle = "#fff";
+                ctx.fillText("Press R to Restart", 90, canvas.height / 2 + 60);
+            }
+            
+            ctx.restore();
+        }
+
+        function update() {
+            if (gameOver || gamePaused) return;
+
+            // Update particles
+            particles = particles.filter(particle => {
+                particle.update();
+                return particle.life > 0;
+            });
+
+            // Update power-ups
+            powerUps.forEach(powerUp => powerUp.update());
+            
+            // Update power-up timer
+            if (powerUpTimer > 0) {
+                powerUpTimer--;
+                if (powerUpTimer === 0) {
+                    activePowerUp = null;
+                    resetPositions(); // Reset ball speed
+                }
+                updatePowerUpIndicator();
+            }
+
+            // Spawn power-ups
+            spawnPowerUp();
+
+            // AI logic
+            let paddleCenter = leftY + (activePowerUp === 'size' ? paddleHeight * 1.5 : paddleHeight) / 2;
+            let aiSpeed = 1.2 + (level - 1) * 0.3;
+            let aiMistake = Math.max(0.7, 1.5 - level * 0.15);
+
+            if (ballSpeedX < 0) {
+                if (paddleCenter < ballY && leftY < canvas.height - paddleHeight) {
+                    leftY += Math.random() < aiMistake ? aiSpeed : aiSpeed / 2;
+                }
+                if (paddleCenter > ballY + ballSize && leftY > 0) {
+                    leftY -= Math.random() < aiMistake ? aiSpeed : aiSpeed / 2;
+                }
+            }
+
+            // Player controls
+            const rightPaddleHeight = activePowerUp === 'size' ? paddleHeight * 1.5 : paddleHeight;
+            const moveSpeed = 4 + (level - 1) * 0.5;
+            
+            if (useMouseControl) {
+                const targetY = mouseY - rightPaddleHeight / 2;
+                rightY = Math.max(0, Math.min(canvas.height - rightPaddleHeight, targetY));
+            } else {
+                if (upPressed && rightY > 0) rightY -= moveSpeed;
+                if (downPressed && rightY < canvas.height - rightPaddleHeight) rightY += moveSpeed;
+            }
+
+            // Update ball trail
+            ballTrail.push({ x: ballX, y: ballY });
+            if (ballTrail.length > 8) ballTrail.shift();
+
+            // Ball movement
+            ballX += ballSpeedX;
+            ballY += ballSpeedY;
+
+            // Ball collision with walls
+            if (ballY <= 0 || ballY + ballSize >= canvas.height) {
+                ballSpeedY *= -1;
+                playSound(440, 40);
+                createParticles(ballX + ballSize / 2, ballY <= 0 ? 0 : canvas.height, "#0ff", 5);
+                
+                // Check for corner hits
+                if ((ballX < 50 || ballX > canvas.width - 50) && (ballY < 20 || ballY > canvas.height - 20)) {
+                    stats.cornersHit++;
+                    showNotification("Corner Hit! +2 points");
+                    if (ballSpeedX > 0) rightScore += 2; else leftScore += 2;
+                    createParticles(ballX + ballSize / 2, ballY + ballSize / 2, "#ff0", 12);
+                }
+            }
+
+            // Ball collision with paddles
+            const leftPaddleHeight = activePowerUp === 'size' ? paddleHeight * 1.5 : paddleHeight;
+            
+            if (ballX <= 20 && ballY + ballSize > leftY && ballY < leftY + leftPaddleHeight) {
+                ballSpeedX *= -1;
+                ballX = 21;
+                rallyCount++;
+                consecutiveHits++;
+                combo++;
+                playSound(880, 60);
+                createParticles(20, ballY + ballSize / 2, "#fff", 8);
+                screenShake = 3;
+                
+                // Add spin based on paddle movement
+                const paddleCenter = leftY + leftPaddleHeight / 2;
+                const hitPos = (ballY + ballSize / 2 - paddleCenter) / (leftPaddleHeight / 2);
+                ballSpeedY += hitPos * 0.5;
+            }
+            
+            if (ballX + ballSize >= canvas.width - 20 && ballY + ballSize > rightY && ballY < rightY + rightPaddleHeight) {
+                ballSpeedX *= -1;
+                ballX = canvas.width - 20 - ballSize - 1;
+                rallyCount++;
+                consecutiveHits++;
+                combo++;
+                playSound(880, 60);
+                createParticles(canvas.width - 20, ballY + ballSize / 2, "#fff", 8);
+                screenShake = 3;
+                
+                // Add spin
+                const paddleCenter = rightY + rightPaddleHeight / 2;
+                const hitPos = (ballY + ballSize / 2 - paddleCenter) / (rightPaddleHeight / 2);
+                ballSpeedY += hitPos * 0.5;
+            }
+
+            // Check power-up collisions
+            powerUps = powerUps.filter(powerUp => {
+                if (powerUp.checkCollision(ballX, ballY)) {
+                    applyPowerUp(powerUp.type);
+                    createParticles(powerUp.x, powerUp.y, "#ff0", 12);
+                    return false;
+                }
+                return true;
+            });
+
+            // Ball out of bounds
+            if (ballX < 0) {
+                rightScore++;
+                playSound(220, 200);
+                createParticles(0, ballY + ballSize / 2, "#0ff", 15);
+                
+                // Check for comeback
+                if (rightScore === WIN_SCORE && leftScore >= 5 && !achievements.comebackKid) {
+                    unlockAchievement('comebackKid', 'Comeback Kid!', 'Win after being down 5+ points');
+                    stats.comebacks++;
+                }
+                
+                updateScoreboard();
+                if (rightScore === WIN_SCORE) {
+                    gameOver = true;
+                    stats.gamesPlayed++;
+                    stats.gamesWon++;
+                    stats.longestRally = Math.max(stats.longestRally, rallyCount);
+                    if (level > stats.highestLevel) stats.highestLevel = level;
+                    checkAchievements();
+                    saveData();
+                    updateStatsDisplay();
+                    playSound(110, 400, "sawtooth");
+                }
+                resetPositions();
+                combo = 0;
+            }
+            
+            if (ballX > canvas.width) {
+                leftScore++;
+                playSound(220, 200);
+                createParticles(canvas.width, ballY + ballSize / 2, "#f00", 15);
+                updateScoreboard();
+                if (leftScore === WIN_SCORE) {
+                    gameOver = true;
+                    stats.gamesPlayed++;
+                    stats.longestRally = Math.max(stats.longestRally, rallyCount);
+                    saveData();
+                    updateStatsDisplay();
+                    playSound(110, 400, "sawtooth");
+                }
+                resetPositions();
+                combo = 0;
+            }
+        }
+
+        function updateScoreboard() {
+            playerScoreEl.textContent = `Player: ${rightScore}`;
+            aiScoreEl.textContent = `AI: ${leftScore}`;
+            levelEl.textContent = `Level: ${level}`;
+        }
+
+        function loop() {
+            update();
+            draw();
+            requestAnimationFrame(loop);
+        }
+
+        // Mouse controls
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            mouseY = e.clientY - rect.top;
+            useMouseControl = true;
+        });
+
+        canvas.addEventListener('mouseleave', () => {
+            useMouseControl = false;
+        });
+
+        // Keyboard controls
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowUp') {
+                upPressed = true;
+                useMouseControl = false;
+            }
+            if (e.key === 'ArrowDown') {
+                downPressed = true;
+                useMouseControl = false;
+            }
+            if (e.key === ' ') {
+                if (!gameOver) {
+                    gamePaused = !gamePaused;
+                }
+            }
+            if (gameOver && (e.key === 'r' || e.key === 'R')) {
+                if (rightScore === WIN_SCORE) {
+                    level++;
+                } else {
+                    level = 1;
+                }
+                resetGameVars();
+                resetPositions();
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            if (e.key === 'ArrowUp') upPressed = false;
+            if (e.key === 'ArrowDown') downPressed = false;
+        });
+
+        // Initialize game
+        loadData();
+        level = 1;
+        resetGameVars();
+        loop();
+    };
+    </script>

@@ -1,0 +1,25 @@
+# Render Blueprint for deployment
+# https://render.com/docs/blueprint-spec
+
+services:
+  - type: web
+    name: retro-arcade
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: JWT_SECRET
+        generateValue: true
+      - key: PORT
+        value: 10000
+    
+    # Health check endpoint
+    healthCheckPath: /
+
+databases:
+  - name: retro-arcade-db
+    databaseName: retro_arcade
+    user: retro_user

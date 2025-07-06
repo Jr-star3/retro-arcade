@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe Pro</title>
+    <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            background: #232526;
+            color: #fff;
+            font-family: 'Press Start 2P', monospace;
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        /* Particle System */
+        .particle { 
+            position: absolute; 
+            width: 4px; 
+            height: 4px; 
+            background: #0ff; 
+            border-radius: 50%; 
+            pointer-events: none; 
+            opacity: 0; 
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: #181818;
+            border-radius: 16px;
+            box-shadow: 0 0 32px #0ff8, 0 0 8px #000a;
+            padding: 32px 32px 16px 32px;
+            margin-top: 20px;
+            position: relative;
+            max-width: 500px;
+        }
+        
+        h1 {
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px #0ff, 2px 2px 4px rgba(0, 255, 255, 0.8);
+            letter-spacing: 3px;
+            font-size: clamp(16px, 4vw, 24px);
+            background: linear-gradient(45deg, #0ff, #fff, #0ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow { 
+            from { filter: brightness(1) drop-shadow(0 0 10px #0ff); }
+            to { filter: brightness(1.2) drop-shadow(0 0 20px #0ff); }
+        }
+        
+        /* Stats Bar */
+        .stats-bar {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 10px;
+            background: #111;
+            border: 2px solid #0ff;
+            border-radius: 8px;
+            padding: 8px 16px;
+            color: #0ff;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+        }
+        
+        /* Game Mode Panel */
+        .mode-panel {
+            background: linear-gradient(135deg, #2a2a4a, #1f1f3f);
+            border: 2px solid #0ff;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+        
+        .mode-title {
+            color: #0ff;
+            font-size: 12px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .mode-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+        }
+        
+        .mode-btn {
+            background: linear-gradient(145deg, #1a1a2e, #2a2a4a);
+            color: #0ff;
+            border: 2px solid #0ff;
+            padding: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 8px;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .mode-btn:hover { background: linear-gradient(145deg, #0ff, #008888); color: #000; }
+        .mode-btn.active { background: linear-gradient(145deg, #0ff, #008888); color: #000; }
+        
+        /* Controls */
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .difficulty-select, .select {
+            background: #1a1a2e;
+            color: #0ff;
+            border: 2px solid #0ff;
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-family: inherit;
+            font-size: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .difficulty-select:hover, .select:hover {
+            border-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+        }
+
+        .cell.hint {
+            background: rgba(255, 255, 0, 0.2);
+            animation: glow 1s infinite alternate;
+        }
+
+        @keyframes glowHint {
+            0% { box-shadow: 0 0 5px rgba(255, 255, 0, 0.5); }
+            100% { box-shadow: 0 0 20px rgba(255, 255, 0, 0.8); }
+        }
+        
+        .board {
+            display: grid;
+            grid-template: repeat(3, 90px) / repeat(3, 90px);
+            gap: 8px;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #0a0a1a, #1a1a2e);
+            border: 4px solid #0ff;
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.5), inset 0 0 20px rgba(0, 255, 255, 0.1);
+            padding: 10px;
+            position: relative;
+        }
+        
+        .cell {
+            background: linear-gradient(145deg, #2a2a4a, #1a1a2e);
+            border: 3px solid #0ff;
+            border-radius: 12px;
+            font-size: 36px;
+            color: #ff0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            font-family: inherit;
+            user-select: none;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cell::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 30%, rgba(0, 255, 255, 0.1) 50%, transparent 70%);
+            transform: translateX(-100%);
+            transition: transform 0.6s;
+        }
+        
+        .cell:hover::before { transform: translateX(100%); }
+        
+        .cell:hover {
+            background: linear-gradient(145deg, #3a3a5a, #2a2a3e);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+            transform: translateY(-2px) scale(1.05);
+            border-color: #fff;
+        }
+        
+        .cell.x { color: #0ff; text-shadow: 0 0 10px #0ff; }
+        .cell.o { color: #ff0; text-shadow: 0 0 10px #ff0; }
+        .cell.winning { 
+            background: linear-gradient(145deg, #00ff00, #008800);
+            animation: winPulse 0.6s ease infinite;
+        }
+        
+        @keyframes winPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        .status {
+            font-size: 14px;
+            margin-bottom: 15px;
+            color: #0ff;
+            text-shadow: 0 0 8px #0ff;
+            background: linear-gradient(135deg, #2a2a4a, #1f1f3f);
+            padding: 10px 20px;
+            border-radius: 12px;
+            border: 2px solid #0ff;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .status::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #0ff, transparent);
+            animation: scan 3s infinite;
+        }
+        
+        @keyframes scan {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        
+        .btn {
+            background: linear-gradient(145deg, #0ff, #008888);
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 10px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 255, 255, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 5px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 255, 255, 0.5);
+            background: linear-gradient(145deg, #fff, #0ff);
+        }
+        
+        .btn:active { transform: translateY(0); }
+        
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #0ff, #00aa88);
+            color: #000;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 10px;
+            font-weight: bold;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0, 255, 255, 0.3);
+        }
+        
+        .notification.show { transform: translateX(0); }
+        
+        .instructions {
+            background: linear-gradient(135deg, #2a2a4a, #1f1f3f);
+            border: 2px solid #0ff;
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 15px;
+            font-size: 8px;
+            color: #fff;
+            line-height: 1.6;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+            text-align: center;
+        }
+        
+        .instructions .key {
+            background: #0ff;
+            color: #000;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin: 0 2px;
+            font-weight: bold;
+        }
+        
+        a.menu-link {
+            color: #0ff;
+            display: block;
+            margin: 20px 0 10px 0;
+            text-decoration: none;
+            font-size: 12px;
+            padding: 10px 20px;
+            border: 2px solid #0ff;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 8px rgba(0, 255, 255, 0.3);
+        }
+        
+        a.menu-link:hover {
+            background: #0ff;
+            color: #000;
+            text-decoration: none;
+            box-shadow: 0 5px 15px rgba(0, 255, 255, 0.4);
+        }
+        
+        footer {
+            margin-top: 20px;
+            color: rgba(0, 255, 255, 0.7);
+            font-size: 8px;
+            text-align: center;
+        }
+        
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .container { padding: 20px; margin: 10px; }
+            .board { 
+                grid-template: repeat(3, 70px) / repeat(3, 70px);
+                gap: 6px;
+                padding: 8px;
+            }
+            .cell { font-size: 28px; }
+            .stats-bar { flex-direction: column; gap: 5px; }
+        }
+        
+        @media (max-width: 480px) {
+            h1 { font-size: 16px; }
+            .board { 
+                grid-template: repeat(3, 60px) / repeat(3, 60px);
+                gap: 4px;
+                padding: 6px;
+            }
+            .cell { font-size: 24px; }
+            .mode-buttons { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Tic Tac Toe</h1>
+        <div class="stats-bar">
+            <div class="stat">Wins: <span id="wins">0</span></div>
+            <div class="stat">Losses: <span id="losses">0</span></div>
+            <div class="stat">Draws: <span id="draws">0</span></div>
+            <div class="stat">Win Rate: <span id="winRate">0%</span></div>
+        </div>
+        <div class="controls">
+            <select id="difficultySelect" class="select">
+                <option value="easy">Easy</option>
+                <option value="medium">Medium</option>
+                <option value="hard" selected>Hard</option>
+            </select>
+            <button class="btn" id="pauseBtn">Pause</button>
+            <button class="btn" id="undoBtn">Undo</button>
+        </div>
+        <div class="status" id="status">Player X's turn</div>
+        <div class="board" id="board"></div>
+        <div class="game-controls">
+            <button class="btn" id="restartBtn">Restart</button>
+            <button class="btn" id="hintBtn">Hint</button>
+        </div>
+        <a class="menu-link" href="../public/arcade.html">&#8592; Back to Menu</a>
+        <div class="achievements" id="achievements"></div>
+    </div>
+    
+    <div class="notification" id="notification"></div>
+    <div class="particles-container" id="particles"></div>
+    <footer>
+        <p>&copy; 2025 Your Name</p>
+    </footer>
+    <script>
+        // Game state
+        let board = ['', '', '', '', '', '', '', '', ''];
+        let currentPlayer = 'X';
+        let gameActive = true;
+        let gameMode = 'ai';
+        let difficulty = 'hard';
+        let isPaused = false;
+        let gameHistory = [];
+        let hintMode = false;
+
+        // Statistics
+        let stats = {
+            wins: 0,
+            losses: 0,
+            draws: 0,
+            gamesPlayed: 0,
+            winStreak: 0,
+            maxWinStreak: 0
+        };
+
+        // Achievements
+        let achievements = {
+            firstWin: false,
+            perfectGame: false,
+            winStreak3: false,
+            winStreak5: false,
+            gamesPlayed10: false,
+            gamesPlayed50: false,
+            noHintsWin: false
+        };
+
+        // Sound effects
+        const sounds = {
+            move: () => playTone(440, 0.1),
+            win: () => {
+                playTone(523, 0.2);
+                setTimeout(() => playTone(659, 0.2), 100);
+                setTimeout(() => playTone(784, 0.3), 200);
+            },
+            lose: () => {
+                playTone(220, 0.3);
+                setTimeout(() => playTone(185, 0.3), 150);
+            },
+            draw: () => playTone(330, 0.4),
+            click: () => playTone(800, 0.05),
+            hint: () => playTone(660, 0.15),
+            achievement: () => {
+                playTone(880, 0.1);
+                setTimeout(() => playTone(1047, 0.1), 100);
+                setTimeout(() => playTone(1319, 0.2), 200);
+            }
+        };
+
+        // Winning combinations
+        const winningCombinations = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+            [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+            [0, 4, 8], [2, 4, 6] // Diagonals
+        ];
+
+        // DOM elements
+        const boardElement = document.getElementById('board');
+        const statusElement = document.getElementById('status');
+        const restartBtn = document.getElementById('restartBtn');
+        const difficultySelect = document.getElementById('difficultySelect');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const undoBtn = document.getElementById('undoBtn');
+        const hintBtn = document.getElementById('hintBtn');
+        const notificationElement = document.getElementById('notification');
+        const achievementsElement = document.getElementById('achievements');
+
+        // Initialize game
+        function init() {
+            loadStats();
+            loadAchievements();
+            createBoard();
+            updateStats();
+            updateStatus();
+            
+            // Event listeners
+            restartBtn.addEventListener('click', () => {
+                sounds.click();
+                restartGame();
+            });
+            
+            difficultySelect.addEventListener('change', (e) => {
+                sounds.click();
+                difficulty = e.target.value;
+            });
+            
+            pauseBtn.addEventListener('click', togglePause);
+            undoBtn.addEventListener('click', undoMove);
+            hintBtn.addEventListener('click', showHint);
+            
+            // Keyboard controls
+            document.addEventListener('keydown', handleKeyboard);
+        }
+
+        // Create board
+        function createBoard() {
+            boardElement.innerHTML = '';
+            board.forEach((cell, index) => {
+                const cellElement = document.createElement('div');
+                cellElement.classList.add('cell');
+                cellElement.setAttribute('data-index', index);
+                cellElement.textContent = cell;
+                cellElement.addEventListener('click', () => handleCellClick(index));
+                
+                if (cell === 'X') cellElement.classList.add('x');
+                if (cell === 'O') cellElement.classList.add('o');
+                
+                boardElement.appendChild(cellElement);
+            });
+        }
+
+        // Handle cell click
+        function handleCellClick(index) {
+            if (!gameActive || isPaused || board[index] !== '' || (gameMode === 'ai' && currentPlayer === 'O')) {
+                return;
+            }
+
+            makeMove(index, currentPlayer);
+        }
+
+        // Make a move
+        function makeMove(index, player) {
+            if (board[index] !== '' || !gameActive) return false;
+
+            // Save state for undo
+            gameHistory.push({
+                board: [...board],
+                currentPlayer: currentPlayer
+            });
+
+            board[index] = player;
+            sounds.move();
+            clearHints();
+            createBoard();
+            createParticles(index);
+
+            if (checkWinner()) {
+                endGame(player);
+            } else if (board.every(cell => cell !== '')) {
+                endGame(null);
+            } else {
+                currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+                updateStatus();
+
+                if (gameMode === 'ai' && currentPlayer === 'O') {
+                    setTimeout(() => {
+                        const aiMove = getAIMove();
+                        if (aiMove !== -1) {
+                            makeMove(aiMove, 'O');
+                        }
+                    }, 500);
+                }
+            }
+
+            updateButtons();
+            return true;
+        }
+
+        // AI Move using Minimax
+        function getAIMove() {
+            if (difficulty === 'easy') {
+                return getRandomMove();
+            } else if (difficulty === 'medium') {
+                return Math.random() < 0.7 ? getBestMove() : getRandomMove();
+            } else {
+                return getBestMove();
+            }
+        }
+
+        function getRandomMove() {
+            const availableMoves = board.map((cell, index) => cell === '' ? index : null).filter(val => val !== null);
+            return availableMoves.length > 0 ? availableMoves[Math.floor(Math.random() * availableMoves.length)] : -1;
+        }
+
+        function getBestMove() {
+            let bestScore = -Infinity;
+            let bestMove = -1;
+
+            for (let i = 0; i < 9; i++) {
+                if (board[i] === '') {
+                    board[i] = 'O';
+                    let score = minimax(board, 0, false);
+                    board[i] = '';
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestMove = i;
+                    }
+                }
+            }
+
+            return bestMove;
+        }
+
+        function minimax(board, depth, isMaximizing) {
+            const result = checkGameState();
+            if (result !== null) {
+                if (result === 'O') return 10 - depth;
+                if (result === 'X') return depth - 10;
+                return 0;
+            }
+
+            if (isMaximizing) {
+                let bestScore = -Infinity;
+                for (let i = 0; i < 9; i++) {
+                    if (board[i] === '') {
+                        board[i] = 'O';
+                        let score = minimax(board, depth + 1, false);
+                        board[i] = '';
+                        bestScore = Math.max(score, bestScore);
+                    }
+                }
+                return bestScore;
+            } else {
+                let bestScore = Infinity;
+                for (let i = 0; i < 9; i++) {
+                    if (board[i] === '') {
+                        board[i] = 'X';
+                        let score = minimax(board, depth + 1, true);
+                        board[i] = '';
+                        bestScore = Math.min(score, bestScore);
+                    }
+                }
+                return bestScore;
+            }
+        }
+
+        function checkGameState() {
+            for (let combination of winningCombinations) {
+                const [a, b, c] = combination;
+                if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+                    return board[a];
+                }
+            }
+            return board.every(cell => cell !== '') ? 'draw' : null;
+        }
+
+        // Check winner
+        function checkWinner() {
+            for (let combination of winningCombinations) {
+                const [a, b, c] = combination;
+                if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+                    highlightWinningCells([a, b, c]);
+                    return board[a];
+                }
+            }
+            return null;
+        }
+
+        // Highlight winning cells
+        function highlightWinningCells(cells) {
+            cells.forEach(index => {
+                const cell = document.querySelector(`[data-index="${index}"]`);
+                cell.classList.add('winning');
+            });
+        }
+
+        // End game
+        function endGame(winner) {
+            gameActive = false;
+            
+            if (winner) {
+                if (winner === 'X') {
+                    stats.wins++;
+                    stats.winStreak++;
+                    stats.maxWinStreak = Math.max(stats.maxWinStreak, stats.winStreak);
+                    sounds.win();
+                    showNotification(`🎉 You Win!`);
+                    checkAchievements('win');
+                } else {
+                    stats.losses++;
+                    stats.winStreak = 0;
+                    sounds.lose();
+                    showNotification(`😞 You Lose!`);
+                }
+                statusElement.textContent = `${winner === 'X' ? 'Player X' : 'Player O'} Wins!`;
+            } else {
+                stats.draws++;
+                stats.winStreak = 0;
+                sounds.draw();
+                showNotification(`🤝 It's a Draw!`);
+                statusElement.textContent = "It's a Draw!";
+            }
+
+            stats.gamesPlayed++;
+            saveStats();
+            updateStats();
+            checkAchievements('gameEnd');
+            updateButtons();
+        }
+
+        // Restart game
+        function restartGame() {
+            board = ['', '', '', '', '', '', '', '', ''];
+            currentPlayer = 'X';
+            gameActive = true;
+            isPaused = false;
+            gameHistory = [];
+            hintMode = false;
+            clearHints();
+            createBoard();
+            updateStatus();
+            updateButtons();
+        }
+
+        // Toggle pause
+        function togglePause() {
+            if (!gameActive) return;
+            
+            isPaused = !isPaused;
+            sounds.click();
+            pauseBtn.textContent = isPaused ? 'Resume' : 'Pause';
+            
+            if (isPaused) {
+                showNotification('⏸️ Game Paused');
+                statusElement.textContent = 'Game Paused';
+            } else {
+                showNotification('▶️ Game Resumed');
+                updateStatus();
+            }
+        }
+
+        // Undo move
+        function undoMove() {
+            if (gameHistory.length === 0 || !gameActive) return;
+            
+            const lastState = gameHistory.pop();
+            board = lastState.board;
+            currentPlayer = lastState.currentPlayer;
+            sounds.click();
+            clearHints();
+            createBoard();
+            updateStatus();
+            updateButtons();
+        }
+
+        // Show hint
+        function showHint() {
+            if (!gameActive || isPaused) return;
+            
+            clearHints();
+            const bestMove = getBestMove();
+            
+            if (bestMove !== -1) {
+                const cell = document.querySelector(`[data-index="${bestMove}"]`);
+                cell.classList.add('hint');
+                sounds.hint();
+                showNotification('💡 Hint: Consider this move!');
+                
+                setTimeout(() => {
+                    clearHints();
+                }, 3000);
+            }
+        }
+
+        // Clear hints
+        function clearHints() {
+            document.querySelectorAll('.cell.hint').forEach(cell => {
+                cell.classList.remove('hint');
+            });
+        }
+
+        // Update status
+        function updateStatus() {
+            if (isPaused) {
+                statusElement.textContent = 'Game Paused';
+            } else if (gameActive) {
+                statusElement.textContent = `Player ${currentPlayer}'s turn`;
+            }
+        }
+
+        // Update buttons
+        function updateButtons() {
+            undoBtn.disabled = gameHistory.length === 0;
+            pauseBtn.disabled = !gameActive;
+            hintBtn.disabled = !gameActive || isPaused;
+        }
+
+        // Update statistics
+        function updateStats() {
+            document.getElementById('wins').textContent = stats.wins;
+            document.getElementById('losses').textContent = stats.losses;
+            document.getElementById('draws').textContent = stats.draws;
+            
+            const winRate = stats.gamesPlayed > 0 ? Math.round((stats.wins / stats.gamesPlayed) * 100) : 0;
+            document.getElementById('winRate').textContent = winRate + '%';
+        }
+
+        // Save/Load statistics
+        function saveStats() {
+            localStorage.setItem('tictactoe_stats', JSON.stringify(stats));
+        }
+
+        function loadStats() {
+            const saved = localStorage.getItem('tictactoe_stats');
+            if (saved) {
+                stats = { ...stats, ...JSON.parse(saved) };
+            }
+        }
+
+        function saveAchievements() {
+            localStorage.setItem('tictactoe_achievements', JSON.stringify(achievements));
+        }
+
+        function loadAchievements() {
+            const saved = localStorage.getItem('tictactoe_achievements');
+            if (saved) {
+                achievements = { ...achievements, ...JSON.parse(saved) };
+            }
+        }
+
+        // Achievement system
+        function checkAchievements(type) {
+            let newAchievements = [];
+
+            if (type === 'win' && !achievements.firstWin && stats.wins === 1) {
+                achievements.firstWin = true;
+                newAchievements.push('🏆 First Victory!');
+            }
+
+            if (type === 'win' && !achievements.winStreak3 && stats.winStreak >= 3) {
+                achievements.winStreak3 = true;
+                newAchievements.push('🔥 Three in a Row!');
+            }
+
+            if (type === 'win' && !achievements.winStreak5 && stats.winStreak >= 5) {
+                achievements.winStreak5 = true;
+                newAchievements.push('⚡ Unstoppable!');
+            }
+
+            if (type === 'gameEnd' && !achievements.gamesPlayed10 && stats.gamesPlayed >= 10) {
+                achievements.gamesPlayed10 = true;
+                newAchievements.push('🎮 Veteran Player!');
+            }
+
+            if (type === 'gameEnd' && !achievements.gamesPlayed50 && stats.gamesPlayed >= 50) {
+                achievements.gamesPlayed50 = true;
+                newAchievements.push('👑 Master Player!');
+            }
+
+            if (newAchievements.length > 0) {
+                sounds.achievement();
+                newAchievements.forEach(achievement => showAchievement(achievement));
+                saveAchievements();
+            }
+        }
+
+        // Show achievement
+        function showAchievement(text) {
+            const achievement = document.createElement('div');
+            achievement.className = 'achievement';
+            achievement.textContent = text;
+            achievementsElement.appendChild(achievement);
+
+            setTimeout(() => {
+                achievement.remove();
+            }, 5000);
+        }
+
+        // Show notification
+        function showNotification(message) {
+            notificationElement.textContent = message;
+            notificationElement.classList.add('show');
+            
+            setTimeout(() => {
+                notificationElement.classList.remove('show');
+            }, 3000);
+        }
+
+        // Keyboard controls
+        function handleKeyboard(e) {
+            if (!gameActive || isPaused) return;
+
+            const key = e.key;
+            let index = -1;
+
+            // Number keys 1-9
+            if (key >= '1' && key <= '9') {
+                index = parseInt(key) - 1;
+            }
+            
+            // Numpad keys
+            const numpadMap = {
+                'Numpad1': 6, 'Numpad2': 7, 'Numpad3': 8,
+                'Numpad4': 3, 'Numpad5': 4, 'Numpad6': 5,
+                'Numpad7': 0, 'Numpad8': 1, 'Numpad9': 2
+            };
+            
+            if (numpadMap[e.code]) {
+                index = numpadMap[e.code];
+            }
+
+            // Other controls
+            if (key === 'r' || key === 'R') {
+                restartGame();
+                return;
+            }
+            
+            if (key === 'p' || key === 'P') {
+                togglePause();
+                return;
+            }
+            
+            if (key === 'u' || key === 'U') {
+                undoMove();
+                return;
+            }
+            
+            if (key === 'h' || key === 'H') {
+                showHint();
+                return;
+            }
+
+            if (index >= 0 && index < 9) {
+                handleCellClick(index);
+            }
+        }
+
+        // Particle effects
+        function createParticles(cellIndex) {
+            const cell = document.querySelector(`[data-index="${cellIndex}"]`);
+            const rect = cell.getBoundingClientRect();
+            
+            for (let i = 0; i < 8; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = rect.left + rect.width / 2 + 'px';
+                particle.style.top = rect.top + rect.height / 2 + 'px';
+                particle.style.background = currentPlayer === 'X' ? '#00ff88' : '#ff6b6b';
+                
+                const angle = (i / 8) * Math.PI * 2;
+                const velocity = 50 + Math.random() * 30;
+                const vx = Math.cos(angle) * velocity;
+                const vy = Math.sin(angle) * velocity;
+                
+                particle.animate([
+                    { transform: 'translate(0, 0) scale(1)', opacity: 1 },
+                    { transform: `translate(${vx}px, ${vy}px) scale(0)`, opacity: 0 }
+                ], {
+                    duration: 800,
+                    easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+                });
+                
+                document.getElementById('particles').appendChild(particle);
+                
+                setTimeout(() => particle.remove(), 800);
+            }
+        }
+
+        // Sound system
+        function playTone(frequency, duration) {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+                oscillator.type = 'square';
+                
+                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + duration);
+            } catch (e) {
+                console.log('Audio not supported');
+            }
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

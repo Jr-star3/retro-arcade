@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Retro Arcade Hub - Premium Gaming Experience</title>
+  <meta name="description" content="Experience the ultimate retro gaming collection with modern enhancements. Premium cyberpunk arcade games await!">
+  <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    
+    body {
+      margin: 0;
+      padding: 20px;
+      background: #232526;
+      min-height: 100vh;
+      color: #fff;
+      font-family: 'Press Start 2P', monospace;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMDBmZmZmIiBzdHJva2Utd2lkdGg9IjAuNSIgb3BhY2l0eT0iMC4xIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIiAvPjwvc3ZnPg==') repeat;
+      pointer-events: none;
+      z-index: -1;
+    }
+    .main-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .hero-section {
+      text-align: center;
+      margin-bottom: 50px;
+      position: relative;
+      overflow: hidden;
+      background: #181818;
+      padding: 40px;
+      border-radius: 16px;
+      border: 2px solid #0ff;
+      box-shadow: 0 0 32px #0ff8, 0 0 8px #000a;
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+    }
+
+    .hero-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.05), transparent);
+      animation: scan 3s infinite;
+    }
+
+    @keyframes scan {
+      0% { left: -100%; }
+      100% { left: 100%; }
+    }
+
+    .logo {
+      font-size: clamp(2rem, 5vw, 4rem);
+      margin-bottom: 20px;
+      background: linear-gradient(45deg, #0ff, #fff, #0ff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 20px #0ff, 2px 2px 4px rgba(0, 255, 255, 0.8);
+      font-weight: bold;
+      animation: glow 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes glow {
+      from { filter: brightness(1) drop-shadow(0 0 10px #0ff); }
+      to { filter: brightness(1.2) drop-shadow(0 0 20px #0ff); }
+    }
+
+    .tagline {
+      font-size: clamp(0.8rem, 2vw, 1.2rem);
+      color: #0ff;
+      margin-bottom: 30px;
+      text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+      line-height: 1.6;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin: 40px 0;
+    }
+
+    .feature-card {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 20px;
+      border-radius: 10px;
+      border: 1px solid #0ff;
+      text-align: center;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0, 255, 255, 0.3);
+    }
+
+    .feature-icon {
+      font-size: 2rem;
+      margin-bottom: 15px;
+      display: block;
+    }
+
+    .feature-title {
+      font-size: 1rem;
+      color: #0ff;
+      margin-bottom: 10px;
+    }
+
+    .feature-desc {
+      font-size: 0.7rem;
+      color: #ccc;
+      line-height: 1.4;
+    }
+
+    .auth-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 40px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .auth-card {
+      background: #181818;
+      padding: 30px;
+      border-radius: 16px;
+      border: 2px solid #0ff;
+      box-shadow: 0 0 32px #0ff8, 0 0 8px #000a;
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      position: relative;
+    }
+
+    .auth-title {
+      font-size: 1.5rem;
+      margin-bottom: 25px;
+      text-align: center;
+      color: #0ff;
+      text-shadow: 2px 2px #0ff, 0 0 8px #0ff8;
+      letter-spacing: 2px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    input[type="email"], input[type="password"] {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.9rem;
+      padding: 15px;
+      border: 2px solid #0ff;
+      border-radius: 8px;
+      background: #111;
+      color: #fff;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+
+    input[type="email"]:focus, input[type="password"]:focus {
+      border-color: #ff0;
+      box-shadow: 0 0 15px rgba(255, 255, 0, 0.3);
+      background: #111;
+    }
+
+    button {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 1rem;
+      padding: 15px 30px;
+      border: none;
+      border-radius: 8px;
+      background: linear-gradient(90deg, #0ff 0%, #00f 100%);
+      color: #222;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      box-shadow: 0 0 8px #0ff8;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 255, 255, 0.4);
+      background: linear-gradient(90deg, #ff0 0%, #f0f 100%);
+      color: #111;
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .link {
+      color: #0ff;
+      text-decoration: none;
+      font-size: 0.8rem;
+      text-align: center;
+      margin-top: 15px;
+      padding: 10px;
+      border: 1px solid #0ff;
+      border-radius: 5px;
+      transition: all 0.3s ease;
+      display: block;
+    }
+
+    .link:hover {
+      background: rgba(0, 255, 255, 0.1);
+      box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+      color: #ff0;
+      text-decoration: underline;
+    }
+
+    .games-preview {
+      margin: 50px 0;
+      text-align: center;
+    }
+
+    .games-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 20px;
+      margin-top: 30px;
+    }
+
+    .game-card {
+      background: rgba(0, 0, 0, 0.4);
+      padding: 20px;
+      border-radius: 10px;
+      border: 1px solid #0ff;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .game-card:hover {
+      transform: scale(1.05);
+      box-shadow: 0 5px 20px rgba(0, 255, 255, 0.4);
+      border-color: #ff0;
+    }
+
+    .game-icon {
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+
+    .game-name {
+      font-size: 0.8rem;
+      color: #ff0;
+    }
+
+    .cta-section {
+      text-align: center;
+      margin: 50px 0;
+      padding: 30px;
+      background: #181818;
+      border-radius: 16px;
+      border: 2px solid #0ff;
+      box-shadow: 0 0 32px #0ff8, 0 0 8px #000a;
+    }
+
+    .cta-title {
+      font-size: 1.5rem;
+      color: #0ff;
+      margin-bottom: 20px;
+      text-shadow: 2px 2px #0ff, 0 0 8px #0ff8;
+    }
+
+    .cta-text {
+      font-size: 0.9rem;
+      color: #ccc;
+      margin-bottom: 25px;
+      line-height: 1.6;
+    }
+
+    .benefits-list {
+      text-align: left;
+      max-width: 400px;
+      margin: 0 auto 30px;
+    }
+
+    .benefit-item {
+      font-size: 0.7rem;
+      color: #0ff;
+      margin: 10px 0;
+      padding-left: 20px;
+      position: relative;
+    }
+
+    .benefit-item::before {
+      content: "▶";
+      position: absolute;
+      left: 0;
+      color: #ff0;
+    }
+
+    @media (max-width: 768px) {
+      .main-container {
+        padding: 10px;
+      }
+      
+      .hero-section {
+        padding: 20px;
+      }
+      
+      .auth-container {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+      
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: linear-gradient(135deg, #0ff, #00aa88);
+      color: #000;
+      padding: 15px 20px;
+      border-radius: 8px;
+      border: 2px solid #0ff;
+      box-shadow: 0 4px 12px rgba(0, 255, 255, 0.3);
+      transform: translateX(400px);
+      transition: transform 0.3s ease;
+      z-index: 1000;
+      font-size: 0.8rem;
+      font-weight: bold;
+    }
+
+    .notification.show {
+      transform: translateX(0);
+    }
+  </style>
+</head>
+<body>
+  <div class="main-container">
+    <!-- Hero Section -->
+    <div class="hero-section">
+      <h1 class="logo">🎮 RETRO ARCADE HUB</h1>
+      <p class="tagline">
+        Experience Classic Games Reimagined<br>
+        Premium Cyberpunk Gaming • Modern Features • Retro Soul
+      </p>
+      
+      <!-- Features Grid -->
+      <div class="features-grid">
+        <div class="feature-card">
+          <span class="feature-icon">🎯</span>
+          <div class="feature-title">Premium Games</div>
+          <div class="feature-desc">Minesweeper, Tetris, Snake, Tic-Tac-Toe, Memory & More</div>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon">⚡</span>
+          <div class="feature-title">Enhanced Features</div>
+          <div class="feature-desc">Statistics, Achievements, Sound Effects, Particle Systems</div>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon">🎨</span>
+          <div class="feature-title">Cyberpunk Style</div>
+          <div class="feature-desc">Neon Aesthetics, Smooth Animations, Retro-Future Design</div>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon">📱</span>
+          <div class="feature-title">Cross-Platform</div>
+          <div class="feature-desc">Play on Desktop, Mobile, Tablet - Anywhere, Anytime</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Games Preview -->
+    <div class="games-preview">
+      <h2 class="cta-title">🎮 Available Games</h2>
+      <div class="games-grid">
+        <div class="game-card">
+          <div class="game-icon">💣</div>
+          <div class="game-name">Minesweeper Pro</div>
+        </div>
+        <div class="game-card">
+          <div class="game-icon">🧩</div>
+          <div class="game-name">Tetris Ultra</div>
+        </div>
+        <div class="game-card">
+          <div class="game-icon">🐍</div>
+          <div class="game-name">Snake Elite</div>
+        </div>
+        <div class="game-card">
+          <div class="game-icon">⭕</div>
+          <div class="game-name">Tic-Tac-Toe AI</div>
+        </div>
+        <div class="game-card">
+          <div class="game-icon">🧠</div>
+          <div class="game-name">Memory Master</div>
+        </div>
+        <div class="game-card">
+          <div class="game-icon">🎯</div>
+          <div class="game-name">Coming Soon...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Call to Action -->
+    <div class="cta-section">
+      <h2 class="cta-title">🚀 Join the Arcade Revolution!</h2>
+      <p class="cta-text">
+        Transform your gaming experience with our premium retro arcade collection.<br>
+        Every game enhanced with modern features while preserving that classic feel.
+      </p>
+      <div class="benefits-list">
+        <div class="benefit-item">Unlimited access to all premium games</div>
+        <div class="benefit-item">Advanced statistics and progress tracking</div>
+        <div class="benefit-item">Achievement system with rewards</div>
+        <div class="benefit-item">Regular updates and new games</div>
+        <div class="benefit-item">Cross-device synchronization</div>
+        <div class="benefit-item">Ad-free premium experience</div>
+      </div>
+    </div>
+
+    <!-- Authentication Section -->
+    <div class="auth-container">
+      <div class="auth-card">
+        <h2 class="auth-title">Welcome Back</h2>
+        <form id="loginForm">
+          <input type="email" name="email" placeholder="Enter your email" required autocomplete="email" />
+          <input type="password" name="password" placeholder="Enter your password" required autocomplete="current-password" />
+          <button type="submit">🎮 Enter Arcade</button>
+        </form>
+        <a class="link" href="forgot-request.html" id="forgotPasswordLink">Forgot Password?</a>
+      </div>
+
+      <div class="auth-card">
+        <h2 class="auth-title">Join the Club</h2>
+        <form id="registerForm">
+          <input type="email" name="email" placeholder="Enter your email" required autocomplete="email" />
+          <input type="password" name="password" placeholder="Create password" required autocomplete="new-password" />
+          <button type="submit">🚀 Create Account</button>
+        </form>
+        <a class="link" href="subscribe.html">View Subscription Plans</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="notification" id="notification"></div>
+  <script>
+    // Enhanced notification system
+    function showNotification(message, type = 'success') {
+      const notification = document.getElementById('notification');
+      notification.textContent = message;
+      notification.className = `notification ${type} show`;
+      
+      setTimeout(() => {
+        notification.classList.remove('show');
+      }, 4000);
+    }
+
+    // Enhanced loading states
+    function setButtonLoading(button, loading) {
+      if (loading) {
+        button.disabled = true;
+        button.textContent = '⏳ Processing...';
+      } else {
+        button.disabled = false;
+        button.textContent = button.id === 'loginBtn' ? '🎮 Enter Arcade' : '🚀 Create Account';
+      }
+    }
+
+    // If already logged in, redirect to arcade menu
+    if (localStorage.getItem('token')) {
+      showNotification('🎮 Welcome back! Redirecting to arcade...');
+      setTimeout(() => {
+        window.location.href = 'arcade.html';
+      }, 1500);
+    }
+
+    // LOGIN FORM HANDLER
+    document.getElementById('loginForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const button = this.querySelector('button');
+      const email = this.email.value;
+      const password = this.password.value;
+      
+      setButtonLoading(button, true);
+      
+      try {
+        const res = await fetch('/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+        
+        if (res.ok && data.type === 'success' && data.data.token) {
+          showNotification('🎉 ' + data.message);
+          // Store token, subscription status, and email in localStorage
+          localStorage.setItem('token', data.data.token);
+          localStorage.setItem('subscribed', data.data.subscribed ? 'true' : 'false');
+          localStorage.setItem('userEmail', email);
+          
+          setTimeout(() => {
+            window.location.href = 'arcade.html';
+          }, 1500);
+        } else {
+          showNotification('❌ ' + (data.message || 'Login failed! Please check your credentials.'), 'error');
+        }
+      } catch (error) {
+        showNotification('❌ Connection error! Please try again.', 'error');
+      } finally {
+        setButtonLoading(button, false);
+      }
+    };
+
+    // REGISTRATION FORM HANDLER
+    document.getElementById('registerForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const button = this.querySelector('button');
+      const email = this.email.value;
+      const password = this.password.value;
+      
+      // Basic validation
+      if (password.length < 6) {
+        showNotification('❌ Password must be at least 6 characters long!', 'error');
+        return;
+      }
+      
+      setButtonLoading(button, true);
+      
+      try {
+        const res = await fetch('/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+        
+        if (res.ok && data.type === 'success') {
+          showNotification('🎉 ' + data.message);
+          // Clear the registration form
+          this.reset();
+          // Focus on login form
+          document.querySelector('#loginForm input[name="email"]').value = email;
+          document.querySelector('#loginForm input[name="email"]').focus();
+        } else {
+          showNotification('❌ ' + (data.message || 'Registration failed! Email might already be in use.'), 'error');
+        }
+      } catch (error) {
+        showNotification('❌ Connection error! Please try again.', 'error');
+      } finally {
+        setButtonLoading(button, false);
+      }
+    };
+
+    // Add smooth scrolling to auth section when clicked
+    document.querySelectorAll('.cta-section, .games-preview').forEach(section => {
+      section.addEventListener('click', () => {
+        document.querySelector('.auth-container').scrollIntoView({
+          behavior: 'smooth'
+        });
+      });
+    });
+
+    // Add game preview animations
+    document.querySelectorAll('.game-card').forEach(card => {
+      card.addEventListener('click', () => {
+        showNotification('🎮 Sign up to unlock this game!');
+        document.querySelector('.auth-container').scrollIntoView({
+          behavior: 'smooth'
+        });
+      });
+    });
+
+    // Add typing effect for tagline
+    function typeWriter(element, text, speed = 100) {
+      let i = 0;
+      element.innerHTML = '';
+      function type() {
+        if (i < text.length) {
+          element.innerHTML += text.charAt(i);
+          i++;
+          setTimeout(type, speed);
+        }
+      }
+      type();
+    }
+
+    // Initialize typing effect after page load
+    window.addEventListener('load', () => {
+      const tagline = document.querySelector('.tagline');
+      const originalText = tagline.textContent;
+      setTimeout(() => {
+        typeWriter(tagline, originalText, 50);
+      }, 1000);
+    });
+  </script>
+</body>
+</html>

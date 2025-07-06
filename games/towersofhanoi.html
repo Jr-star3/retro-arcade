@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Towers of Hanoi</title>
+    <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
+    <style>
+        body {
+            background: #222;
+            color: #fff;
+            font-family: 'Press Start 2P', monospace, cursive;
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: #181818;
+            border-radius: 16px;
+            box-shadow: 0 0 32px #0ff8, 0 0 8px #000a;
+            padding: 32px 32px 16px 32px;
+            margin-top: 40px;
+        }
+        h1 {
+            margin-bottom: 20px;
+            text-shadow: 2px 2px #0ff, 0 0 8px #0ff8;
+            letter-spacing: 2px;
+        }
+        .scoreboard {
+            margin-bottom: 10px;
+            font-size: 12px;
+            background: #111;
+            border: 2px solid #0ff;
+            border-radius: 8px;
+            padding: 8px 16px;
+            color: #fff;
+            box-shadow: 0 0 8px #0ff4;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            text-align: center;
+        }
+        .timer {
+            color: #ff0;
+            font-weight: bold;
+        }
+        .achievements {
+            background: #111;
+            border: 2px solid #0f0;
+            border-radius: 8px;
+            padding: 8px 16px;
+            margin: 10px 0;
+            font-size: 8px;
+            color: #0f0;
+            text-align: center;
+            min-height: 40px;
+        }
+        .achievement {
+            display: inline-block;
+            margin: 2px;
+            padding: 3px 6px;
+            background: #333;
+            border: 1px solid #0f0;
+            border-radius: 4px;
+            opacity: 0.3;
+            transition: all 0.3s ease;
+        }
+        .achievement.unlocked {
+            background: #0f0;
+            color: #222;
+            opacity: 1;
+            animation: achievementUnlock 0.8s ease-in-out;
+        }
+        @keyframes achievementUnlock {
+            0% { transform: scale(1); box-shadow: 0 0 4px #0f0; }
+            50% { transform: scale(1.2); box-shadow: 0 0 16px #0f0; }
+            100% { transform: scale(1); box-shadow: 0 0 8px #0f0; }
+        }
+        .stats {
+            background: #111;
+            border: 2px solid #f0f;
+            border-radius: 8px;
+            padding: 8px 16px;
+            margin: 10px 0;
+            font-size: 9px;
+            color: #f0f;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            text-align: center;
+        }
+        .hint-section {
+            margin: 10px 0;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .hint-text {
+            background: #440;
+            border: 1px solid #ff0;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 8px;
+            color: #ff0;
+            margin: 3px 0;
+            text-align: center;
+            min-height: 16px;
+            max-width: 400px;
+            transition: all 0.3s ease;
+        }
+        .hint-text.show {
+            animation: hintGlow 0.5s ease-in-out;
+        }
+        @keyframes hintGlow {
+            0%, 100% { box-shadow: 0 0 4px #ff0; }
+            50% { box-shadow: 0 0 12px #ff0; }
+        }
+        .difficulty-selector {
+            margin: 10px 0;
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .difficulty-btn {
+            background: #333;
+            color: #fff;
+            border: 1px solid #0ff;
+            border-radius: 4px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 8px;
+            padding: 6px 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .difficulty-btn:hover {
+            background: #0ff;
+            color: #222;
+            transform: scale(1.05);
+        }
+        .difficulty-btn.active {
+            background: #0ff;
+            color: #222;
+            box-shadow: 0 0 8px #0ff;
+        }
+        @keyframes diskMove {
+            0% { transform: translateY(0px) scale(1); }
+            25% { transform: translateY(-40px) scale(1.1); }
+            75% { transform: translateY(-40px) scale(1.1); }
+            100% { transform: translateY(0px) scale(1); }
+        }
+        @keyframes pegGlow {
+            0% { filter: drop-shadow(0 0 8px #ff0); }
+            50% { filter: drop-shadow(0 0 20px #ff0); }
+            100% { filter: drop-shadow(0 0 8px #ff0); }
+        }
+        @keyframes winFlash {
+            0% { background: #111; border-color: #0ff; }
+            25% { background: #004; border-color: #ff0; }
+            50% { background: #040; border-color: #0f0; }
+            75% { background: #400; border-color: #f0f; }
+            100% { background: #111; border-color: #0ff; }
+        }
+        @keyframes perfectWin {
+            0% { background: #111; }
+            20% { background: #004; }
+            40% { background: #040; }
+            60% { background: #440; }
+            80% { background: #400; }
+            100% { background: #111; }
+        }
+        .win-animation {
+            animation: winFlash 0.4s ease-in-out 5;
+        }
+        .perfect-win {
+            animation: perfectWin 0.3s ease-in-out 8;
+        }
+        .peg-highlight {
+            animation: pegGlow 1s ease-in-out infinite;
+        }
+        .sound-toggle {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #333;
+            color: #0ff;
+            border: 1px solid #0ff;
+            border-radius: 4px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 8px;
+            padding: 4px 8px;
+            cursor: pointer;
+        }
+        .sound-toggle.on {
+            background: #0ff;
+            color: #222;
+        }
+        #hanoiCanvas {
+            background: #111;
+            border: 6px solid #0ff;
+            border-radius: 8px;
+            image-rendering: pixelated;
+            box-shadow: 0 0 24px #0ff8;
+            margin-bottom: 16px;
+            display: block;
+        }
+        .instructions {
+            background: #222;
+            border: 2px solid #0ff;
+            border-radius: 8px;
+            padding: 10px 18px;
+            margin-top: 10px;
+            font-size: 12px;
+            color: #fff;
+            text-align: center;
+            box-shadow: 0 0 8px #0ff4;
+        }
+        .instructions span {
+            color: #0ff;
+        }
+        a.menu-link {
+            color: #0ff;
+            display: block;
+            margin: 12px 0;
+            text-align: center;
+            text-decoration: none;
+        }
+        a.menu-link:hover {
+            text-decoration: underline;
+        }
+        footer {
+            margin-top: 24px;
+            color: #0ff;
+            font-size: 10px;
+            text-align: center;
+            opacity: 0.7;
+        }
+        .peg-highlight {
+            box-shadow: 0 0 16px #ff0;
+        }
+        .btn {
+            background: #0ff;
+            color: #222;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Press Start 2P', monospace, cursive;
+            font-size: 12px;
+            padding: 8px 16px;
+            margin: 6px 3px;
+            cursor: pointer;
+            box-shadow: 0 0 8px #0ff8;
+            transition: all 0.2s ease;
+        }
+        .btn:hover {
+            background: #ff0;
+            color: #222;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px #0ff8;
+        }
+        .btn:active {
+            transform: translateY(0px);
+        }
+        .btn.small {
+            font-size: 9px;
+            padding: 5px 10px;
+            margin: 3px 2px;
+        }
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 255, 255, 0.95);
+            color: #222;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 10px;
+            z-index: 1000;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        .notification.show {
+            opacity: 1;
+            animation: slideDown 0.3s ease-out;
+        }
+        @keyframes slideDown {
+            from { transform: translateX(-50%) translateY(-100%); }
+            to { transform: translateX(-50%) translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="sound-toggle" id="soundToggle" onclick="toggleSound()">🔊</button>
+        <h1>Towers of Hanoi</h1>
+        <div class="scoreboard">
+            <span id="moves">Moves: 0</span>
+            <span id="timer" class="timer">Time: 00:00</span>
+            <span id="minmoves">Min: 7</span>
+            <span id="disks">Disks: 3</span>
+        </div>
+        
+        <div class="achievements">
+            <div>🏆 Achievements</div>
+            <div id="achievementList">
+                <span class="achievement" id="firstWin">First Win</span>
+                <span class="achievement" id="perfectSolver">Perfect Solver</span>
+                <span class="achievement" id="speedRunner">Speed Runner</span>
+                <span class="achievement" id="masterSolver">Master Solver</span>
+                <span class="achievement" id="efficiency">Efficiency Expert</span>
+                <span class="achievement" id="persistent">Persistent Player</span>
+            </div>
+        </div>
+
+        <div class="stats">
+            <span id="totalGames">Games: 0</span>
+            <span id="totalWins">Wins: 0</span>
+            <span id="bestTime">Best: --:--</span>
+            <span id="avgMoves">Avg Moves: --</span>
+            <span id="perfectGames">Perfect: 0</span>
+            <span id="winRate">Win Rate: 0%</span>
+        </div>
+
+        <canvas id="hanoiCanvas" width="420" height="220"></canvas>
+        
+        <div class="hint-section">
+            <button class="btn small" onclick="getHint()">Hint</button>
+            <button class="btn small" onclick="autoSolve()">Auto Solve</button>
+            <button class="btn small" onclick="showBestMove()">Best Move</button>
+        </div>
+        
+        <div class="hint-text" id="hintText">Click a disk to pick it up, then click a peg to place it.</div>
+
+        <div class="difficulty-selector">
+            <button class="difficulty-btn" onclick="setDifficulty(3)">Easy (3)</button>
+            <button class="difficulty-btn active" onclick="setDifficulty(4)">Normal (4)</button>
+            <button class="difficulty-btn" onclick="setDifficulty(5)">Hard (5)</button>
+            <button class="difficulty-btn" onclick="setDifficulty(6)">Expert (6)</button>
+            <button class="difficulty-btn" onclick="setDifficulty(7)">Master (7)</button>
+        </div>
+
+        <div>
+            <button class="btn" onclick="changeDisks(-1)">-</button>
+            <button class="btn" onclick="changeDisks(1)">+</button>
+            <button class="btn" onclick="resetGame()">Restart</button>
+            <button class="btn" onclick="newGame()">New Game</button>
+        </div>
+        
+        <div class="instructions">
+            <p>
+                Click a disk to pick it up, then click a peg to place.<br>
+                Only move one disk at a time.<br>
+                No disk on top of a smaller disk.<br>
+                Move all disks to the rightmost peg.<br>
+                <b>Try to solve in the minimum moves!</b>
+            </p>
+        </div>
+        <a class="menu-link" href="../public/arcade.html">&#8592; Back to Menu</a>
+    </div>
+    
+    <div class="notification" id="notification"></div>
+    <footer>
+        <p>&copy; 2025 Your Name</p>
+    </footer>
+    <script>
+    const canvas = document.getElementById('hanoiCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    // Game state
+    let numDisks = 4;
+    let pegs, moves, minMoves, heldDisk = null, heldFrom = null, win = false;
+    let gameStartTime = null;
+    let gameTimer = null;
+    let elapsedTime = 0;
+    let soundEnabled = true;
+    let autoSolving = false;
+    let solutionSteps = [];
+    let solutionIndex = 0;
+    
+    // Statistics
+    let stats = {
+        totalGames: 0,
+        totalWins: 0,
+        bestTime: null,
+        totalMoves: 0,
+        perfectGames: 0,
+        gamesPlayed: {}
+    };
+    
+    // Achievements
+    let achievements = {
+        firstWin: false,
+        perfectSolver: false,
+        speedRunner: false,
+        masterSolver: false,
+        efficiency: false,
+        persistent: false
+    };
+    
+    // Load saved data
+    function loadData() {
+        const savedStats = localStorage.getItem('hanoiStats');
+        const savedAchievements = localStorage.getItem('hanoiAchievements');
+        const savedSound = localStorage.getItem('hanoiSound');
+        
+        if (savedStats) stats = {...stats, ...JSON.parse(savedStats)};
+        if (savedAchievements) achievements = {...achievements, ...JSON.parse(savedAchievements)};
+        if (savedSound) soundEnabled = JSON.parse(savedSound);
+        
+        updateStatsDisplay();
+        updateAchievementsDisplay();
+        updateSoundButton();
+    }
+    
+    // Save data
+    function saveData() {
+        localStorage.setItem('hanoiStats', JSON.stringify(stats));
+        localStorage.setItem('hanoiAchievements', JSON.stringify(achievements));
+        localStorage.setItem('hanoiSound', JSON.stringify(soundEnabled));
+    }
+    
+    // Sound effects
+    function playSound(type) {
+        if (!soundEnabled) return;
+        
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        switch(type) {
+            case 'pickup':
+                oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(880, audioContext.currentTime + 0.1);
+                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+                oscillator.start();
+                oscillator.stop(audioContext.currentTime + 0.1);
+                break;
+            case 'place':
+                oscillator.frequency.setValueAtTime(880, audioContext.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(440, audioContext.currentTime + 0.15);
+                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
+                oscillator.start();
+                oscillator.stop(audioContext.currentTime + 0.15);
+                break;
+            case 'win':
+                for(let i = 0; i < 5; i++) {
+                    setTimeout(() => {
+                        const osc = audioContext.createOscillator();
+                        const gain = audioContext.createGain();
+                        osc.connect(gain);
+                        gain.connect(audioContext.destination);
+                        osc.frequency.setValueAtTime(440 * Math.pow(2, i/4), audioContext.currentTime);
+                        gain.gain.setValueAtTime(0.1, audioContext.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                        osc.start();
+                        osc.stop(audioContext.currentTime + 0.3);
+                    }, i * 100);
+                }
+                break;
+            case 'perfect':
+                for(let i = 0; i < 8; i++) {
+                    setTimeout(() => {
+                        const osc = audioContext.createOscillator();
+                        const gain = audioContext.createGain();
+                        osc.connect(gain);
+                        gain.connect(audioContext.destination);
+                        osc.frequency.setValueAtTime(523 * Math.pow(2, i/8), audioContext.currentTime);
+                        gain.gain.setValueAtTime(0.15, audioContext.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+                        osc.start();
+                        osc.stop(audioContext.currentTime + 0.2);
+                    }, i * 80);
+                }
+                break;
+        }
+    }
+    
+    function toggleSound() {
+        soundEnabled = !soundEnabled;
+        updateSoundButton();
+        saveData();
+    }
+    
+    function updateSoundButton() {
+        const btn = document.getElementById('soundToggle');
+        btn.textContent = soundEnabled ? '🔊' : '🔇';
+        btn.className = soundEnabled ? 'sound-toggle on' : 'sound-toggle';
+    }
+    
+    // Timer functions
+    function startTimer() {
+        if (gameTimer) clearInterval(gameTimer);
+        gameStartTime = Date.now();
+        elapsedTime = 0;
+        gameTimer = setInterval(updateTimer, 100);
+    }
+    
+    function stopTimer() {
+        if (gameTimer) {
+            clearInterval(gameTimer);
+            gameTimer = null;
+        }
+    }
+    
+    function updateTimer() {
+        elapsedTime = Date.now() - gameStartTime;
+        const minutes = Math.floor(elapsedTime / 60000);
+        const seconds = Math.floor((elapsedTime % 60000) / 1000);
+        document.getElementById('timer').textContent = 
+            `Time: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+    
+    // Notifications
+    function showNotification(message, type = 'info') {
+        const notification = document.getElementById('notification');
+        notification.textContent = message;
+        notification.className = `notification show ${type}`;
+        
+        setTimeout(() => {
+            notification.className = 'notification';
+        }, 3000);
+    }
+    
+    // Hint system
+    function getHint() {
+        if (win || autoSolving) return;
+        
+        const hints = [
+            "Move smaller disks first to access larger ones.",
+            "Use the middle peg as temporary storage.",
+            "Never place a larger disk on a smaller one.",
+            "Think recursively: solve for n-1 disks first.",
+            "The optimal solution always exists!",
+            "Try to minimize back-and-forth movements.",
+            "Focus on getting the largest disk to the target peg."
+        ];
+        
+        const hintText = document.getElementById('hintText');
+        const randomHint = hints[Math.floor(Math.random() * hints.length)];
+        hintText.textContent = randomHint;
+        hintText.className = 'hint-text show';
+        
+        setTimeout(() => {
+            hintText.className = 'hint-text';
+        }, 3000);
+    }
+    
+    // Show best next move
+    function showBestMove() {
+        if (win || autoSolving) return;
+        
+        const solution = solveTowersOptimal(numDisks, 0, 2, 1);
+        const currentState = pegsToString();
+        
+        for (let step of solution) {
+            if (applyMoveToState(currentState, step.from, step.to) === pegsToString()) {
+                const hintText = document.getElementById('hintText');
+                hintText.textContent = `Best move: Move disk from peg ${step.from + 1} to peg ${step.to + 1}`;
+                hintText.className = 'hint-text show';
+                
+                // Highlight pegs
+                highlightPegs(step.from, step.to);
+                
+                setTimeout(() => {
+                    hintText.className = 'hint-text';
+                }, 3000);
+                break;
+            }
+        }
+    }
+    
+    function highlightPegs(from, to) {
+        // This would add visual highlighting to the pegs
+        // Implementation would involve adding CSS classes to highlight the pegs
+    }
+    
+    function pegsToString() {
+        return pegs.map(peg => peg.join(',')).join('|');
+    }
+    
+    function applyMoveToState(state, from, to) {
+        // Simulate applying a move to a state string
+        const pegsCopy = state.split('|').map(peg => peg ? peg.split(',').map(Number) : []);
+        if (pegsCopy[from].length > 0) {
+            const disk = pegsCopy[from].pop();
+            pegsCopy[to].push(disk);
+        }
+        return pegsCopy.map(peg => peg.join(',')).join('|');
+    }
+    
+    // Auto-solve functionality
+    function autoSolve() {
+        if (win) return;
+        
+        autoSolving = true;
+        solutionSteps = solveTowersOptimal(numDisks, 0, 2, 1);
+        solutionIndex = 0;
+        
+        showNotification("Auto-solving...", "info");
+        
+        const interval = setInterval(() => {
+            if (solutionIndex >= solutionSteps.length || win) {
+                clearInterval(interval);
+                autoSolving = false;
+                return;
+            }
+            
+            const step = solutionSteps[solutionIndex];
+            if (pegs[step.from].length > 0) {
+                const disk = pegs[step.from].pop();
+                pegs[step.to].push(disk);
+                moves++;
+                updateDisplay();
+                playSound('place');
+                
+                if (pegs[2].length === numDisks) {
+                    handleWin();
+                }
+            }
+            
+            solutionIndex++;
+        }, 500);
+    }
+    
+    function solveTowersOptimal(n, from, to, aux) {
+        const moves = [];
+        
+        function solve(n, from, to, aux) {
+            if (n === 1) {
+                moves.push({from, to});
+                return;
+            }
+            
+            solve(n - 1, from, aux, to);
+            moves.push({from, to});
+            solve(n - 1, aux, to, from);
+        }
+        
+        solve(n, from, to, aux);
+        return moves;
+    }
+    
+    // Difficulty settings
+    function setDifficulty(disks) {
+        numDisks = disks;
+        
+        // Update button states
+        document.querySelectorAll('.difficulty-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        event.target.classList.add('active');
+        
+        newGame();
+    }
+    
+    // Game functions
+    function resetGame() {
+        stopTimer();
+        pegs = [[], [], []];
+        for (let i = numDisks; i >= 1; i--) pegs[0].push(i);
+        moves = 0;
+        heldDisk = null;
+        heldFrom = null;
+        win = false;
+        autoSolving = false;
+        minMoves = Math.pow(2, numDisks) - 1;
+        elapsedTime = 0;
+        
+        updateDisplay();
+        startTimer();
+        draw();
+    }
+    
+    function newGame() {
+        stats.totalGames++;
+        resetGame();
+        saveData();
+    }
+    
+    function changeDisks(delta) {
+        if (numDisks + delta >= 3 && numDisks + delta <= 7) {
+            numDisks += delta;
+            resetGame();
+        }
+    }
+    
+    function updateDisplay() {
+        document.getElementById('moves').textContent = "Moves: " + moves;
+        document.getElementById('minmoves').textContent = "Min: " + minMoves;
+        document.getElementById('disks').textContent = "Disks: " + numDisks;
+    }
+    
+    function updateStatsDisplay() {
+        document.getElementById('totalGames').textContent = `Games: ${stats.totalGames}`;
+        document.getElementById('totalWins').textContent = `Wins: ${stats.totalWins}`;
+        document.getElementById('bestTime').textContent = `Best: ${stats.bestTime ? formatTime(stats.bestTime) : '--:--'}`;
+        document.getElementById('avgMoves').textContent = `Avg Moves: ${stats.totalWins > 0 ? Math.round(stats.totalMoves / stats.totalWins) : '--'}`;
+        document.getElementById('perfectGames').textContent = `Perfect: ${stats.perfectGames}`;
+        document.getElementById('winRate').textContent = `Win Rate: ${stats.totalGames > 0 ? Math.round((stats.totalWins / stats.totalGames) * 100) : 0}%`;
+    }
+    
+    function formatTime(ms) {
+        const minutes = Math.floor(ms / 60000);
+        const seconds = Math.floor((ms % 60000) / 1000);
+        return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+    
+    function updateAchievementsDisplay() {
+        Object.keys(achievements).forEach(key => {
+            const element = document.getElementById(key);
+            if (element) {
+                element.className = achievements[key] ? 'achievement unlocked' : 'achievement';
+            }
+        });
+    }
+    
+    function checkAchievements() {
+        let newAchievements = [];
+        
+        // First Win
+        if (!achievements.firstWin && stats.totalWins >= 1) {
+            achievements.firstWin = true;
+            newAchievements.push("First Win - Completed your first puzzle!");
+        }
+        
+        // Perfect Solver - win in minimum moves
+        if (!achievements.perfectSolver && moves === minMoves) {
+            achievements.perfectSolver = true;
+            newAchievements.push("Perfect Solver - Solved in minimum moves!");
+            stats.perfectGames++;
+        }
+        
+        // Speed Runner - win in under 30 seconds with 4+ disks
+        if (!achievements.speedRunner && elapsedTime < 30000 && numDisks >= 4) {
+            achievements.speedRunner = true;
+            newAchievements.push("Speed Runner - Lightning fast solve!");
+        }
+        
+        // Master Solver - win with 6+ disks
+        if (!achievements.masterSolver && numDisks >= 6) {
+            achievements.masterSolver = true;
+            newAchievements.push("Master Solver - Conquered the tower!");
+        }
+        
+        // Efficiency Expert - win with < 150% of minimum moves
+        if (!achievements.efficiency && moves <= Math.floor(minMoves * 1.5)) {
+            achievements.efficiency = true;
+            newAchievements.push("Efficiency Expert - Close to optimal!");
+        }
+        
+        // Persistent Player - play 10 games
+        if (!achievements.persistent && stats.totalGames >= 10) {
+            achievements.persistent = true;
+            newAchievements.push("Persistent Player - Keep it up!");
+        }
+        
+        // Show new achievements
+        newAchievements.forEach((msg, index) => {
+            setTimeout(() => {
+                showNotification(msg, "achievement");
+            }, index * 1000);
+        });
+        
+        updateAchievementsDisplay();
+    }
+    
+    function handleWin() {
+        win = true;
+        stopTimer();
+        
+        // Update stats
+        stats.totalWins++;
+        stats.totalMoves += moves;
+        
+        if (!stats.bestTime || elapsedTime < stats.bestTime) {
+            stats.bestTime = elapsedTime;
+        }
+        
+        checkAchievements();
+        updateStatsDisplay();
+        saveData();
+        
+        // Play win sound
+        if (moves === minMoves) {
+            playSound('perfect');
+            canvas.className = 'perfect-win';
+            showNotification(`PERFECT! Solved in ${moves} moves!`, "perfect");
+        } else {
+            playSound('win');
+            canvas.className = 'win-animation';
+            showNotification(`Completed in ${moves} moves!`, "win");
+        }
+        
+        // Reset animation
+        setTimeout(() => {
+            canvas.className = '';
+        }, 2000);
+    }
+    
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Draw pegs
+        for (let i = 0; i < 3; i++) {
+            ctx.fillStyle = "#0ff";
+            ctx.fillRect(80 + i * 130, 40, 8, 140);
+            
+            // Draw peg base
+            ctx.fillStyle = "#0ff";
+            ctx.fillRect(50 + i * 130, 175, 68, 15);
+        }
+        
+        // Draw main base
+        ctx.fillStyle = "#0ff";
+        ctx.fillRect(40, 180, 340, 10);
+
+        // Draw disks with animation
+        for (let p = 0; p < 3; p++) {
+            let peg = pegs[p];
+            for (let d = 0; d < peg.length; d++) {
+                let disk = peg[d];
+                let diskWidth = 30 + disk * 22;
+                let x = 84 + p * 130 - diskWidth / 2 + 4;
+                let y = 170 - d * 20;
+                
+                // Disk colors with gradients
+                const colors = [
+                    "#ff0", "#f0f", "#0f0", "#f00", 
+                    "#00f", "#fa0", "#fff"
+                ];
+                
+                ctx.fillStyle = colors[disk % 7];
+                ctx.fillRect(x, y, diskWidth, 18);
+                
+                // Add border and shading
+                ctx.strokeStyle = "#222";
+                ctx.lineWidth = 2;
+                ctx.strokeRect(x, y, diskWidth, 18);
+                
+                // Add disk number
+                ctx.fillStyle = "#222";
+                ctx.font = "bold 12px 'Press Start 2P'";
+                ctx.textAlign = "center";
+                ctx.fillText(disk, x + diskWidth / 2, y + 13);
+            }
+        }
+
+        // Draw held disk
+        if (heldDisk !== null && heldFrom !== null) {
+            let mouseX = lastMouse.x, mouseY = lastMouse.y;
+            let diskWidth = 30 + heldDisk * 22;
+            ctx.globalAlpha = 0.8;
+            
+            const colors = ["#ff0", "#f0f", "#0f0", "#f00", "#00f", "#fa0", "#fff"];
+            ctx.fillStyle = colors[heldDisk % 7];
+            ctx.fillRect(mouseX - diskWidth / 2, mouseY - 10, diskWidth, 18);
+            
+            ctx.strokeStyle = "#fff";
+            ctx.lineWidth = 2;
+            ctx.strokeRect(mouseX - diskWidth / 2, mouseY - 10, diskWidth, 18);
+            
+            ctx.globalAlpha = 1;
+        }
+
+        // Win message
+        if (win) {
+            ctx.font = "20px 'Press Start 2P'";
+            ctx.fillStyle = "#ff0";
+            ctx.textAlign = "center";
+            ctx.fillText("YOU WIN!", canvas.width / 2, 60);
+            
+            ctx.font = "10px 'Press Start 2P'";
+            ctx.fillStyle = "#fff";
+            
+            if (moves === minMoves) {
+                ctx.fillText("PERFECT SOLUTION!", canvas.width / 2, 80);
+            } else {
+                ctx.fillText(`Solved in ${moves} moves (min: ${minMoves})`, canvas.width / 2, 80);
+            }
+            
+            const timeText = formatTime(elapsedTime);
+            ctx.fillText(`Time: ${timeText}`, canvas.width / 2, 95);
+        }
+    }
+
+    let lastMouse = {x: 0, y: 0};
+    
+    canvas.addEventListener('mousemove', e => {
+        const rect = canvas.getBoundingClientRect();
+        lastMouse.x = e.clientX - rect.left;
+        lastMouse.y = e.clientY - rect.top;
+        if (heldDisk !== null) draw();
+    });
+
+    canvas.addEventListener('mousedown', e => {
+        if (win || autoSolving) return;
+        
+        const rect = canvas.getBoundingClientRect();
+        const mx = e.clientX - rect.left;
+        const my = e.clientY - rect.top;
+        
+        // Find which peg was clicked
+        for (let p = 0; p < 3; p++) {
+            let pegX = 88 + p * 130;
+            if (mx > pegX - 40 && mx < pegX + 40) {
+                // If holding nothing, pick up top disk
+                if (heldDisk === null && pegs[p].length > 0) {
+                    let topDisk = pegs[p][pegs[p].length - 1];
+                    let diskY = 170 - (pegs[p].length - 1) * 20;
+                    if (my > diskY && my < diskY + 18) {
+                        heldDisk = topDisk;
+                        heldFrom = p;
+                        pegs[p].pop();
+                        playSound('pickup');
+                        draw();
+                        return;
+                    }
+                }
+                // If holding a disk, try to place
+                else if (heldDisk !== null) {
+                    let canPlace = pegs[p].length === 0 || pegs[p][pegs[p].length - 1] > heldDisk;
+                    if (canPlace) {
+                        pegs[p].push(heldDisk);
+                        moves++;
+                        updateDisplay();
+                        playSound('place');
+                        heldDisk = null;
+                        heldFrom = null;
+                        
+                        // Check win
+                        if (pegs[2].length === numDisks) {
+                            handleWin();
+                        }
+                        draw();
+                        return;
+                    }
+                }
+            }
+        }
+        
+        // If click elsewhere, return held disk to original peg
+        if (heldDisk !== null && heldFrom !== null) {
+            pegs[heldFrom].push(heldDisk);
+            heldDisk = null;
+            heldFrom = null;
+            draw();
+        }
+    });
+
+    // Touch support
+    canvas.addEventListener('touchstart', function(e) {
+        let touch = e.touches[0];
+        let rect = canvas.getBoundingClientRect();
+        lastMouse.x = touch.clientX - rect.left;
+        lastMouse.y = touch.clientY - rect.top;
+        canvas.dispatchEvent(new MouseEvent('mousedown', {
+            clientX: touch.clientX,
+            clientY: touch.clientY
+        }));
+        e.preventDefault();
+    }, {passive: false});
+    
+    canvas.addEventListener('touchmove', function(e) {
+        let touch = e.touches[0];
+        let rect = canvas.getBoundingClientRect();
+        lastMouse.x = touch.clientX - rect.left;
+        lastMouse.y = touch.clientY - rect.top;
+        draw();
+        e.preventDefault();
+    }, {passive: false});
+
+    // Initialize game
+    loadData();
+    resetGame();
+    </script>
+</body>
+</html>

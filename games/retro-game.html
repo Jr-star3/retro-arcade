@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retro Game</title>
+    <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
+    <style>
+        body {
+            background: #222;
+            color: #fff;
+            font-family: 'Press Start 2P', monospace, cursive;
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: #181818;
+            border-radius: 16px;
+            box-shadow: 0 0 32px #0ff8, 0 0 8px #000a;
+            padding: 32px 32px 16px 32px;
+            margin-top: 40px;
+        }
+        .scoreboard {
+            display: flex;
+            gap: 24px;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 12px;
+            font-size: 12px;
+            font-family: 'Press Start 2P', monospace, cursive;
+            background: #111;
+            border: 2px solid #0ff;
+            border-radius: 8px;
+            padding: 8px 16px;
+            color: #fff;
+            box-shadow: 0 0 8px #0ff4;
+        }
+        #gameCanvas {
+            background: #111;
+            border: 6px solid #0ff;
+            border-radius: 8px;
+            image-rendering: pixelated;
+            box-shadow: 0 0 24px #0ff8;
+            margin-bottom: 16px;
+            display: block;
+        }
+        h1 {
+            margin-bottom: 20px;
+            text-shadow: 2px 2px #0ff, 0 0 8px #0ff8;
+            letter-spacing: 2px;
+        }
+        .instructions {
+            background: #222;
+            border: 2px solid #0ff;
+            border-radius: 8px;
+            padding: 10px 18px;
+            margin-top: 10px;
+            font-size: 12px;
+            color: #fff;
+            text-align: center;
+            box-shadow: 0 0 8px #0ff4;
+        }
+        .instructions span {
+            color: #0ff;
+        }
+        a.menu-link {
+            color: #0ff;
+            display: block;
+            margin: 12px 0;
+            text-align: center;
+            text-decoration: none;
+        }
+        a.menu-link:hover {
+            text-decoration: underline;
+        }
+        footer {
+            margin-top: 24px;
+            color: #0ff;
+            font-size: 10px;
+            text-align: center;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Retro Game</h1>
+        <div class="scoreboard" id="scoreboard">
+            <span id="score">Score: 0</span>
+            <span id="level">Level: 1</span>
+            <span id="high">High: 0</span>
+            <span id="sound">Sound: On</span>
+            <span id="pause">Pause: P</span>
+            <span id="lives">Lives: 5</span>
+        </div>
+        <canvas id="gameCanvas" width="320" height="240"></canvas>
+        <div class="instructions">
+            <p>
+                Use <span>Arrow Keys</span> to move<br>
+                Collect coins, avoid enemies!<br>
+                <span>Yellow</span>=5pts, <span>Blue</span>=10pts, <span>Purple</span>=20pts<br>
+                Power-ups: <span>White</span>=Invincible, <span>Green</span>=Speed, <span>Orange</span>=Slow Enemies<br>
+                <span>P</span> = Pause &nbsp; <span>M</span> = Mute<br>
+                <b>20 Levels to Victory! Boss fights at levels 5, 10, 15 & 20!</b><br>
+                <b>Press <span>R</span> to restart</b>
+            </p>
+        </div>
+       <a class="menu-link" href="../public/arcade.html">&#8592; Back to Menu</a>
+    </div>
+    <footer>
+        <p>&copy; 2025 Your Name</p>
+    </footer>
+    <script>
+    window.onload = function() {
+
+        // Prevent arrow keys from scrolling the page
+        window.addEventListener("keydown", function(e) {
+            if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Scoreboard elements
+        const scoreEl = document.getElementById('score');
+        const levelEl = document.getElementById('level');
+        const highEl = document.getElementById('high');
+        const soundEl = document.getElementById('sound');
+        const pauseEl = document.getElementById('pause');
+        const livesEl = document.getElementById('lives');
+
+        // Player properties (slightly bigger than enemy/coins, fixed size)
+        const player = { x: 150, y: 110, size: 26, speed: 3, invulnerable: 0, speedBoost: 0 };
+
+        // Coin properties
+        const coins = [];
+        const powerUps = [];
+        const particles = [];
+        const enemies = [];
+
+        // Screen shake
+        let screenShake = 0;
+
+        function placeCoin(x, y, type = 'normal') {
+            let newCoin;
+            do {
+                newCoin = {
+                    x: x || Math.floor(Math.random() * 16) * 20,
+                    y: y || Math.floor(Math.random() * 12) * 20,
+                    size: 16,
+                    type: type,
+                    value: type === 'normal' ? 5 : type === 'blue' ? 10 : 20
+                };
+            } while (
+                (Math.abs(newCoin.x - player.x) < 30 && Math.abs(newCoin.y - player.y) < 30) ||
+                enemies.some(e => Math.abs(newCoin.x - e.x) < 30 && Math.abs(newCoin.y - e.y) < 30) ||
+                coins.some(c => Math.abs(newCoin.x - c.x) < 30 && Math.abs(newCoin.y - c.y) < 30)
+            );
+            coins.push(newCoin);
+        }
+
+        function placePowerUp() {
+            if (Math.random() < 0.3) { // 30% chance
+                let types = ['invincible', 'speed', 'slow'];
+                let type = types[Math.floor(Math.random() * types.length)];
+                let powerUp;
+                do {
+                    powerUp = {
+                        x: Math.floor(Math.random() * 16) * 20,
+                        y: Math.floor(Math.random() * 12) * 20,
+                        size: 20,
+                        type: type,
+                        duration: 300 // 5 seconds at 60fps
+                    };
+                } while (
+                    (Math.abs(powerUp.x - player.x) < 40 && Math.abs(powerUp.y - player.y) < 40) ||
+                    enemies.some(e => Math.abs(powerUp.x - e.x) < 40 && Math.abs(powerUp.y - e.y) < 40)
+                );
+                powerUps.push(powerUp);
+            }
+        }
+
+        function createEnemy(x, y, type = 'normal') {
+            return {
+                x: x || Math.floor(Math.random() * 16) * 20,
+                y: y || Math.floor(Math.random() * 12) * 20,
+                size: type === 'boss' ? 40 : 20,
+                speed: type === 'boss' ? 1 : 2,
+                dx: type === 'boss' ? 1 : 2,
+                dy: type === 'boss' ? 1 : 2,
+                type: type,
+                hp: type === 'boss' ? 3 : 1
+            };
+        }
+
+        function addParticle(x, y, color, count = 5) {
+            for (let i = 0; i < count; i++) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    vx: (Math.random() - 0.5) * 4,
+                    vy: (Math.random() - 0.5) * 4,
+                    color: color,
+                    life: 30,
+                    maxLife: 30
+                });
+            }
+        }
+
+        // Initialize game objects
+        placeCoin();
+        placeCoin();
+        enemies.push(createEnemy());
+
+        let score = 0;
+        let level = 1;
+        let gameOver = false;
+        let highScore = parseInt(localStorage.getItem('retroGameHigh')) || 0;
+        let paused = false;
+        let soundOn = true;
+        let win = false;
+        let lives = 5;
+        let coinChain = 0;
+        let chainTime = 0;
+        let levelNotification = '';
+        let levelNotificationTime = 0;
+        let backgroundHue = 200; // Starting blue hue
+
+        // Keyboard state
+        const keys = {};
+
+        document.addEventListener('keydown', (e) => {
+            if (gameOver && (e.key === 'r' || e.key === 'R')) {
+                resetGame();
+                gameLoop();
+            }
+            if (win && (e.key === 'r' || e.key === 'R')) {
+                resetGame();
+                gameLoop();
+            }
+            if (e.key === 'p' || e.key === 'P') paused = !paused;
+            if (e.key === 'm' || e.key === 'M') soundOn = !soundOn;
+            keys[e.key] = true;
+            updateScoreboard();
+        });
+
+        document.addEventListener('keyup', (e) => {
+            keys[e.key] = false;
+        });
+
+        function resetGame() {
+            player.x = 150;
+            player.y = 110;
+            player.size = 26;
+            player.speed = 3;
+            player.invulnerable = 0;
+            player.speedBoost = 0;
+            score = 0;
+            level = 1;
+            coins.length = 0;
+            powerUps.length = 0;
+            particles.length = 0;
+            enemies.length = 0;
+            enemies.push(createEnemy());
+            placeCoin();
+            placeCoin();
+            gameOver = false;
+            paused = false;
+            win = false;
+            lives = 5;
+            coinChain = 0;
+            chainTime = 0;
+            screenShake = 0;
+            levelNotification = '';
+            levelNotificationTime = 0;
+            backgroundHue = 200; // Reset to starting blue
+            updateScoreboard();
+        }
+
+        function updatePlayer() {
+            let speed = player.speed;
+            if (player.speedBoost > 0) {
+                speed *= 1.5;
+                player.speedBoost--;
+            }
+            
+            let newX = player.x;
+            if (keys['ArrowLeft']) newX -= speed;
+            if (keys['ArrowRight']) newX += speed;
+            player.x = Math.max(0, Math.min(canvas.width - player.size, newX));
+            let newY = player.y;
+            if (keys['ArrowUp']) newY -= speed;
+            if (keys['ArrowDown']) newY += speed;
+            player.y = Math.max(0, Math.min(canvas.height - player.size, newY));
+            
+            if (player.invulnerable > 0) player.invulnerable--;
+            if (chainTime > 0) chainTime--;
+            else coinChain = 0;
+            if (levelNotificationTime > 0) levelNotificationTime--;
+        }
+
+        function showLevelNotification(level) {
+            if (level === 5) {
+                levelNotification = 'LEVEL 5 - FIRST BOSS!';
+            } else if (level === 10) {
+                levelNotification = 'LEVEL 10 - HALFWAY THERE!';
+            } else if (level === 15) {
+                levelNotification = 'LEVEL 15 - TRIPLE COINS!';
+            } else if (level === 20) {
+                levelNotification = 'LEVEL 20 - FINAL BOSS!';
+            } else if (level % 5 === 0) {
+                levelNotification = `LEVEL ${level} - BOSS FIGHT!`;
+            } else {
+                levelNotification = `LEVEL ${level}`;
+            }
+            levelNotificationTime = 180; // 3 seconds at 60fps
+            
+            // Change background hue based on level
+            backgroundHue = (200 + level * 8) % 360;
+        }
+
+        function beep(frequency = 440, duration = 100) {
+            if (!soundOn || !window.AudioContext) return;
+            const ctx = new window.AudioContext();
+            const osc = ctx.createOscillator();
+            osc.type = "square";
+            osc.frequency.value = frequency;
+            osc.connect(ctx.destination);
+            osc.start();
+            setTimeout(() => {
+                osc.stop();
+                ctx.close();
+            }, duration);
+        }
+
+        function checkCoinCollision() {
+            for (let i = coins.length - 1; i >= 0; i--) {
+                let coin = coins[i];
+                if (
+                    player.x < coin.x + coin.size &&
+                    player.x + player.size > coin.x &&
+                    player.y < coin.y + coin.size &&
+                    player.y + player.size > coin.y
+                ) {
+                    let points = coin.value;
+                    coinChain++;
+                    chainTime = 120; // 2 seconds
+                    
+                    if (coinChain > 1) {
+                        points *= coinChain; // Chain bonus
+                        beep(880 + coinChain * 100, 80);
+                    } else {
+                        beep(880, 80);
+                    }
+                    
+                    score += points;
+                    if (score > highScore) {
+                        highScore = score;
+                        localStorage.setItem('retroGameHigh', highScore);
+                    }
+                    
+                    addParticle(coin.x + coin.size/2, coin.y + coin.size/2, coin.type === 'normal' ? '#ff0' : coin.type === 'blue' ? '#00f' : '#f0f');
+                    coins.splice(i, 1);
+                    
+                    // Spawn new coin
+                    let coinType = Math.random() < 0.7 ? 'normal' : Math.random() < 0.8 ? 'blue' : 'purple';
+                    placeCoin(null, null, coinType);
+                    
+                    checkLevelUp();
+                    updateScoreboard();
+                }
+            }
+            
+            // Check power-up collisions
+            for (let i = powerUps.length - 1; i >= 0; i--) {
+                let powerUp = powerUps[i];
+                if (
+                    player.x < powerUp.x + powerUp.size &&
+                    player.x + player.size > powerUp.x &&
+                    player.y < powerUp.y + powerUp.size &&
+                    player.y + player.size > powerUp.y
+                ) {
+                    if (powerUp.type === 'invincible') {
+                        player.invulnerable = powerUp.duration;
+                        beep(1000, 200);
+                    } else if (powerUp.type === 'speed') {
+                        player.speedBoost = powerUp.duration;
+                        beep(1200, 200);
+                    } else if (powerUp.type === 'slow') {
+                        enemies.forEach(e => {
+                            e.speed *= 0.5;
+                            e.dx *= 0.5;
+                            e.dy *= 0.5;
+                        });
+                        setTimeout(() => {
+                            enemies.forEach(e => {
+                                e.speed *= 2;
+                                e.dx *= 2;
+                                e.dy *= 2;
+                            });
+                        }, 3000);
+                        beep(800, 200);
+                    }
+                    addParticle(powerUp.x + powerUp.size/2, powerUp.y + powerUp.size/2, '#0ff', 8);
+                    powerUps.splice(i, 1);
+                }
+            }
+        }
+
+        function checkLevelUp() {
+            let newLevel = Math.floor(score / 75) + 1; // Changed from 100 to 75 for smoother progression
+            if (newLevel > level && level < 20) { // Max 20 levels
+                level = newLevel;
+                player.speed = 3 + (level - 1) * 0.2; // Slower speed increase
+                
+                // Add enemies more gradually - every 4 levels instead of 3
+                if (level % 4 === 0 && enemies.length < 5) {
+                    enemies.push(createEnemy());
+                }
+                
+                // Boss levels: 5, 10, 15, 20
+                if (level % 5 === 0) {
+                    enemies.push(createEnemy(null, null, 'boss'));
+                    beep(800, 300); // Special boss sound
+                }
+                
+                // Milestone rewards
+                if (level === 5) {
+                    placePowerUp(); // Extra power-up at level 5
+                    beep(1000, 200);
+                } else if (level === 10) {
+                    lives += 2; // Bonus lives at halfway point
+                    placePowerUp();
+                    beep(1200, 300);
+                } else if (level === 15) {
+                    // Triple coin spawning for next 30 seconds
+                    setTimeout(() => {
+                        for (let i = 0; i < 3; i++) {
+                            let coinType = Math.random() < 0.5 ? 'blue' : 'purple';
+                            placeCoin(null, null, coinType);
+                        }
+                    }, 100);
+                    beep(1400, 250);
+                } else if (level === 20) {
+                    // Special level 20 celebration
+                    for (let i = 0; i < 10; i++) {
+                        setTimeout(() => {
+                            addParticle(Math.random() * canvas.width, Math.random() * canvas.height, '#0ff', 3);
+                        }, i * 100);
+                    }
+                    beep(1600, 400);
+                }
+                
+                // Update enemy speeds with more balanced scaling
+                enemies.forEach(e => {
+                    let speedMultiplier = 1 + (level - 1) * 0.08; // Reduced from 0.1
+                    e.speed = (e.type === 'boss' ? 1.2 : 2) * speedMultiplier;
+                    if (e.dx < 0) e.dx = -e.speed;
+                    else e.dx = e.speed;
+                    if (e.dy < 0) e.dy = -e.speed;
+                    else e.dy = e.speed;
+                });
+                
+                beep(1200, 120);
+                placePowerUp();
+                updateScoreboard();
+                
+                // Level-up notification
+                showLevelNotification(level);
+            }
+            
+            // Win condition at level 20
+            if (level >= 20) {
+                win = true;
+                beep(1500, 400);
+                // Victory bonus
+                score += 500;
+                updateScoreboard();
+            }
+        }
+
+        // Draw player as a circle with effects
+        function drawPlayer() {
+            let alpha = 1;
+            if (player.invulnerable > 0) {
+                alpha = 0.5 + 0.5 * Math.sin(Date.now() * 0.02); // Flashing effect
+            }
+            
+            ctx.globalAlpha = alpha;
+            if (player.speedBoost > 0) {
+                ctx.fillStyle = '#0f0'; // Green when speed boosted
+            } else {
+                ctx.fillStyle = '#0ff';
+            }
+            ctx.beginPath();
+            ctx.arc(player.x + player.size / 2, player.y + player.size / 2, player.size / 2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.globalAlpha = 1;
+        }
+
+        // Draw coins with different colors
+        function drawCoins() {
+            coins.forEach(coin => {
+                ctx.fillStyle = coin.type === 'normal' ? '#ff0' : coin.type === 'blue' ? '#00f' : '#f0f';
+                ctx.beginPath();
+                ctx.arc(coin.x + coin.size / 2, coin.y + coin.size / 2, coin.size / 2, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Sparkle effect
+                if (Math.random() < 0.1) {
+                    addParticle(coin.x + Math.random() * coin.size, coin.y + Math.random() * coin.size, ctx.fillStyle, 1);
+                }
+            });
+        }
+
+        // Draw power-ups
+        function drawPowerUps() {
+            powerUps.forEach(powerUp => {
+                let color = powerUp.type === 'invincible' ? '#fff' : powerUp.type === 'speed' ? '#0f0' : '#f80';
+                ctx.fillStyle = color;
+                ctx.beginPath();
+                ctx.arc(powerUp.x + powerUp.size / 2, powerUp.y + powerUp.size / 2, powerUp.size / 2, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Pulsing effect
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(powerUp.x + powerUp.size / 2, powerUp.y + powerUp.size / 2, 
+                       powerUp.size / 2 + 5 * Math.sin(Date.now() * 0.01), 0, Math.PI * 2);
+                ctx.stroke();
+            });
+        }
+
+        // Draw particles
+        function drawParticles() {
+            for (let i = particles.length - 1; i >= 0; i--) {
+                let p = particles[i];
+                ctx.globalAlpha = p.life / p.maxLife;
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
+                ctx.fill();
+                
+                p.x += p.vx;
+                p.y += p.vy;
+                p.life--;
+                
+                if (p.life <= 0) {
+                    particles.splice(i, 1);
+                }
+            }
+            ctx.globalAlpha = 1;
+        }
+
+        function gameLoop() {
+            ctx.save();
+            
+            // Screen shake effect
+            if (screenShake > 0) {
+                ctx.translate((Math.random() - 0.5) * screenShake, (Math.random() - 0.5) * screenShake);
+                screenShake *= 0.9;
+                if (screenShake < 0.1) screenShake = 0;
+            }
+            
+            // Dynamic background based on level
+            let bgColor = `hsl(${backgroundHue}, 20%, 7%)`;
+            ctx.fillStyle = bgColor;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            if (!gameOver && !win) {
+                if (!paused) {
+                    updatePlayer();
+                    checkCoinCollision();
+                    moveEnemies();
+                    checkEnemyCollision();
+                }
+                drawCoins();
+                drawPowerUps();
+                drawParticles();
+                drawPlayer();
+                drawEnemies();
+                
+                // Draw level notification
+                if (levelNotificationTime > 0) {
+                    ctx.font = "14px 'Press Start 2P', monospace";
+                    ctx.fillStyle = levelNotificationTime > 120 ? "#0ff" : "#fff";
+                    let textWidth = ctx.measureText(levelNotification).width;
+                    ctx.fillText(levelNotification, (canvas.width - textWidth) / 2, 50);
+                }
+                
+                if (paused) {
+                    ctx.font = "16px 'Press Start 2P', monospace";
+                    ctx.fillStyle = "#ff0";
+                    ctx.fillText("PAUSED", 100, 120);
+                }
+                requestAnimationFrame(gameLoop);
+            } else if (gameOver) {
+                drawCoins();
+                drawPowerUps();
+                drawParticles();
+                drawPlayer();
+                drawEnemies();
+                drawGameOver();
+            } else if (win) {
+                drawCoins();
+                drawPowerUps();
+                drawParticles();
+                drawPlayer();
+                drawEnemies();
+                drawWin();
+            }
+            
+            ctx.restore();
+        }
+
+        // Multiple enemy movement with improved anti-sticking logic
+        function moveEnemies() {
+            enemies.forEach(enemy => {
+                enemy.x += enemy.dx;
+                enemy.y += enemy.dy;
+                
+                // Prevent wall sticking with better collision detection
+                if (enemy.x <= 0) {
+                    enemy.x = 0;
+                    enemy.dx = Math.abs(enemy.dx) + (Math.random() - 0.5) * 0.5;
+                }
+                if (enemy.x + enemy.size >= canvas.width) {
+                    enemy.x = canvas.width - enemy.size;
+                    enemy.dx = -Math.abs(enemy.dx) + (Math.random() - 0.5) * 0.5;
+                }
+                if (enemy.y <= 0) {
+                    enemy.y = 0;
+                    enemy.dy = Math.abs(enemy.dy) + (Math.random() - 0.5) * 0.5;
+                }
+                if (enemy.y + enemy.size >= canvas.height) {
+                    enemy.y = canvas.height - enemy.size;
+                    enemy.dy = -Math.abs(enemy.dy) + (Math.random() - 0.5) * 0.5;
+                }
+                
+                // Maintain consistent speed
+                let currentSpeed = Math.sqrt(enemy.dx * enemy.dx + enemy.dy * enemy.dy);
+                if (currentSpeed > 0) {
+                    enemy.dx = (enemy.dx / currentSpeed) * enemy.speed;
+                    enemy.dy = (enemy.dy / currentSpeed) * enemy.speed;
+                }
+            });
+        }
+
+        // Enemy collision with multiple enemies and boss mechanics
+        function checkEnemyCollision() {
+            if (player.invulnerable > 0) return;
+            
+            for (let i = enemies.length - 1; i >= 0; i--) {
+                let enemy = enemies[i];
+                if (
+                    player.x < enemy.x + enemy.size &&
+                    player.x + player.size > enemy.x &&
+                    player.y < enemy.y + enemy.size &&
+                    player.y + player.size > enemy.y
+                ) {
+                    if (enemy.type === 'boss') {
+                        enemy.hp--;
+                        if (enemy.hp <= 0) {
+                            addParticle(enemy.x + enemy.size/2, enemy.y + enemy.size/2, '#f00', 15);
+                            enemies.splice(i, 1);
+                            score += 50; // Bonus for defeating boss
+                            beep(500, 300);
+                        } else {
+                            addParticle(enemy.x + enemy.size/2, enemy.y + enemy.size/2, '#f80', 8);
+                            beep(300, 150);
+                        }
+                        player.invulnerable = 60; // 1 second immunity
+                    } else {
+                        beep(220, 300);
+                        lives--;
+                        screenShake = 10;
+                        addParticle(player.x + player.size/2, player.y + player.size/2, '#f00', 10);
+                        updateScoreboard();
+                        
+                        if (lives <= 0) {
+                            gameOver = true;
+                        } else {
+                            // Reset player position and give brief immunity
+                            player.x = 150;
+                            player.y = 110;
+                            player.invulnerable = 120; // 2 seconds immunity
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+
+        // Draw multiple enemies with different types
+        function drawEnemies() {
+            enemies.forEach(enemy => {
+                if (enemy.type === 'boss') {
+                    // Boss enemy - larger and different color
+                    ctx.fillStyle = enemy.hp > 1 ? '#f80' : '#f00';
+                    ctx.beginPath();
+                    ctx.arc(enemy.x + enemy.size / 2, enemy.y + enemy.size / 2, enemy.size / 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Health indicator
+                    ctx.fillStyle = '#fff';
+                    ctx.font = "8px Arial";
+                    ctx.fillText(enemy.hp, enemy.x + enemy.size/2 - 4, enemy.y + enemy.size/2 + 3);
+                } else {
+                    // Normal enemy
+                    ctx.fillStyle = '#f00';
+                    ctx.beginPath();
+                    ctx.arc(enemy.x + enemy.size / 2, enemy.y + enemy.size / 2, enemy.size / 2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                
+                // Enemy trail effect
+                if (Math.random() < 0.3) {
+                    addParticle(enemy.x + enemy.size/2, enemy.y + enemy.size/2, '#f004', 1);
+                }
+            });
+        }
+
+        function drawGameOver() {
+            ctx.font = "16px 'Press Start 2P', monospace";
+            ctx.fillStyle = "#fff";
+            ctx.fillText("GAME OVER", 60, 120);
+            ctx.font = "10px 'Press Start 2P', monospace";
+            ctx.fillText("Press R to Restart", 50, 150);
+        }
+
+        function drawWin() {
+            // Victory particles
+            for (let i = 0; i < 3; i++) {
+                addParticle(Math.random() * canvas.width, Math.random() * canvas.height, '#0f0', 1);
+            }
+            
+            ctx.font = "16px 'Press Start 2P', monospace";
+            ctx.fillStyle = "#0f0";
+            ctx.fillText("VICTORY!", 85, 100);
+            
+            ctx.font = "10px 'Press Start 2P', monospace";
+            ctx.fillStyle = "#fff";
+            ctx.fillText("20 Levels Complete!", 50, 125);
+            ctx.fillText("Final Score: " + score, 60, 145);
+            ctx.fillText("Press R to Restart", 50, 165);
+            
+            // Celebration effect
+            if (Math.random() < 0.3) {
+                addParticle(Math.random() * canvas.width, Math.random() * canvas.height, '#ff0', 2);
+            }
+        }
+
+        function updateScoreboard() {
+            scoreEl.textContent = "Score: " + score;
+            levelEl.textContent = "Level: " + level;
+            highEl.textContent = "High: " + highScore;
+            soundEl.textContent = "Sound: " + (soundOn ? "On" : "Off");
+            pauseEl.textContent = "Pause: P";
+            livesEl.textContent = "Lives: " + lives;
+            
+            // Show chain bonus
+            if (coinChain > 1 && chainTime > 0) {
+                ctx.font = "12px 'Press Start 2P', monospace";
+                ctx.fillStyle = "#ff0";
+                ctx.fillText("CHAIN x" + coinChain, 10, 30);
+            }
+        }
+
+        updateScoreboard();
+        gameLoop();
+    };
+    </script>
+    </body>
+    </html>

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cancelled</title>
+  <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
+  <style>
+    body { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f1419 100%); color: #fff; font-family: 'Press Start 2P', monospace, cursive; min-height: 100vh; margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
+    
+    .container { background: #181818; border-radius: 16px; box-shadow: 0 0 32px #0ff8, 0 0 8px #000a; padding: 40px 32px 32px 32px; margin-top: 40px; text-align: center; max-width: 600px; width: 100%; position: relative; overflow: hidden; animation: fadeInUp 1s ease-out; }
+    
+    .container::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #0ff, #ff0, #f0f, #0ff); animation: glow 2s ease-in-out infinite alternate; }
+    
+    @keyframes glow { 0% { opacity: 0.5; } 100% { opacity: 1; } }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes bounce { 0%, 20%, 50%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-10px); } 60% { transform: translateY(-5px); } }
+    @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+    
+    .cancel-icon { font-size: 64px; margin-bottom: 20px; animation: bounce 2s ease-in-out; color: #ff0; text-shadow: 0 0 20px #ff08; }
+    
+    h1 { font-size: 32px; margin: 20px 0 10px 0; text-shadow: 2px 2px #0ff, 0 0 16px #0ff8; letter-spacing: 3px; animation: fadeInUp 1s ease-out 0.2s both; }
+    h2 { font-size: 24px; margin: 18px 0 12px 0; text-shadow: 2px 2px #0ff, 0 0 8px #0ff8; letter-spacing: 2px; animation: fadeInUp 1s ease-out 0.4s both; }
+    
+    .message { font-size: 14px; color: #aaa; margin-bottom: 25px; line-height: 1.5; animation: fadeInUp 1s ease-out 0.6s both; }
+    
+    .reassurance { margin: 25px 0; padding: 20px; background: rgba(255, 255, 0, 0.05); border: 1px solid #ff03; border-radius: 12px; animation: fadeInUp 1s ease-out 0.8s both; }
+    .reassurance-item { display: flex; align-items: center; justify-content: center; margin: 10px 0; font-size: 12px; }
+    .reassurance-item::before { content: '✓'; color: #4f4; margin-right: 10px; animation: pulse 2s infinite; }
+    
+    .action-buttons { display: flex; flex-direction: column; gap: 15px; margin: 25px 0; animation: fadeInUp 1s ease-out 1s both; }
+    
+    .btn { font-family: inherit; font-size: 16px; padding: 12px 20px; border-radius: 8px; border: 2px solid #0ff; background: linear-gradient(90deg, #0ff 0%, #00f 100%); color: #222; text-decoration: none; cursor: pointer; transition: all 0.3s; display: inline-block; font-weight: bold; }
+    .btn:hover { background: linear-gradient(90deg, #ff0 0%, #f0f 100%); color: #111; transform: translateY(-2px); box-shadow: 0 4px 16px #0ff8; }
+    .btn.primary { background: linear-gradient(90deg, #ff0 0%, #f80 100%); color: #222; border-color: #ff0; }
+    .btn.primary:hover { background: linear-gradient(90deg, #0ff 0%, #00f 100%); color: #222; }
+    .btn.secondary { background: transparent; color: #0ff; }
+    .btn.secondary:hover { background: rgba(0, 255, 255, 0.1); color: #ff0; }
+    .btn.support { background: transparent; color: #aaa; border-color: #666; font-size: 14px; }
+    .btn.support:hover { background: rgba(170, 170, 170, 0.1); color: #fff; border-color: #aaa; }
+    
+    .help-section { margin-top: 30px; padding: 20px; background: rgba(0, 255, 255, 0.02); border-radius: 12px; animation: fadeInUp 1s ease-out 1.2s both; }
+    .help-title { font-size: 14px; color: #0ff; margin-bottom: 15px; }
+    .help-text { font-size: 11px; color: #999; line-height: 1.4; margin-bottom: 15px; }
+    
+    @media (max-width: 768px) {
+      body { padding: 10px; }
+      .container { margin-top: 20px; padding: 24px 20px; }
+      h1 { font-size: 24px; }
+      h2 { font-size: 20px; }
+      .cancel-icon { font-size: 48px; }
+      .reassurance-item { font-size: 11px; }
+      .btn { font-size: 14px; padding: 10px 16px; }
+    }
+    
+    @media (max-width: 480px) {
+      h1 { font-size: 20px; letter-spacing: 2px; }
+      h2 { font-size: 18px; }
+      .cancel-icon { font-size: 40px; }
+      .reassurance-item { font-size: 10px; }
+      .message { font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="cancel-icon">⏸️</div>
+    <h1>🎮 PAYMENT PAUSED</h1>
+    <h2>No Worries - It Happens!</h2>
+    <p class="message">Your payment was cancelled and no charges were made to your account. Your gaming session can continue whenever you're ready!</p>
+    
+    <div class="reassurance">
+      <div class="reassurance-item">No charges were processed</div>
+      <div class="reassurance-item">Your account remains secure</div>
+      <div class="reassurance-item">You can try again anytime</div>
+    </div>
+    
+    <div class="action-buttons">
+      <a href="subscribe.html" class="btn primary">🚀 Try Premium Again</a>
+      <a href="../arcade.html" class="btn secondary">🎮 Continue with Free Games</a>
+      <a href="index.html" class="btn secondary">← Back to Home</a>
+    </div>
+    
+    <div class="help-section">
+      <div class="help-title">Need Help?</div>
+      <p class="help-text">If you experienced any issues during checkout or have questions about our premium games, we're here to help!</p>
+      <a href="mailto:support@retroarcade.com" class="btn support">📧 Contact Support</a>
+    </div>
+  </div>
+  <script>
+    // Track cancellation for analytics (optional)
+    try {
+      // You could send analytics data here
+      console.log('Payment cancelled - user returned to cancel page');
+      
+      // Optional: Store that user was interested but cancelled
+      localStorage.setItem('paymentCancelled', 'true');
+      localStorage.setItem('cancelledAt', new Date().toISOString());
+    } catch (e) {
+      // Ignore errors
+    }
+  </script>

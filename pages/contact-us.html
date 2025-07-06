@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - Retro Arcade</title>
+    <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
+    <style>
+        :root {
+            --neon-cyan: #00ffff;
+            --neon-pink: #ff00ff;
+            --dark-bg: #0a0a0a;
+            --card-bg: #181818;
+            --text-primary: #ffffff;
+            --text-secondary: #cccccc;
+            --success-green: #00ff00;
+            --error-red: #ff0040;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body { 
+            background: var(--dark-bg); 
+            color: var(--text-primary); 
+            font-family: 'Press Start 2P', monospace; 
+            margin: 0; 
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container { 
+            max-width: 700px; 
+            margin: 0 auto; 
+            background: var(--card-bg); 
+            border-radius: 16px; 
+            box-shadow: 0 0 32px rgba(0, 255, 255, 0.3); 
+            padding: 32px;
+            border: 2px solid var(--neon-cyan);
+        }
+
+        h1 { 
+            color: var(--neon-cyan);
+            text-align: center;
+            margin-bottom: 32px;
+            text-shadow: 0 0 15px var(--neon-cyan);
+            letter-spacing: 2px;
+            font-size: 24px;
+        }
+
+        h2 {
+            color: var(--neon-pink);
+            margin-top: 32px;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+
+        .contact-info {
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid var(--neon-cyan);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 32px;
+        }
+
+        .contact-method {
+            margin-bottom: 16px;
+            font-size: 10px;
+        }
+
+        .contact-method strong {
+            color: var(--neon-pink);
+        }
+
+        .form-section {
+            margin-top: 32px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--neon-cyan);
+            font-size: 10px;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 2px solid var(--neon-cyan);
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 10px;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--neon-pink);
+            box-shadow: 0 0 10px rgba(255, 0, 255, 0.5);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        button {
+            background: linear-gradient(45deg, var(--neon-cyan), var(--neon-pink));
+            color: var(--dark-bg);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0, 255, 255, 0.5);
+        }
+
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .form-note {
+            background: rgba(255, 0, 64, 0.1);
+            border: 1px solid var(--error-red);
+            border-radius: 8px;
+            padding: 16px;
+            margin: 20px 0;
+            font-size: 9px;
+            color: var(--error-red);
+        }
+
+        .alternative-contact {
+            background: rgba(0, 255, 0, 0.1);
+            border: 1px solid var(--success-green);
+            border-radius: 8px;
+            padding: 16px;
+            margin: 20px 0;
+            font-size: 10px;
+        }
+
+        .support-topics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+
+        .support-topic {
+            background: rgba(0, 255, 255, 0.05);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .support-topic h3 {
+            color: var(--neon-pink);
+            font-size: 10px;
+            margin-bottom: 8px;
+        }
+
+        .support-topic p {
+            font-size: 8px;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+        .back-button {
+            display: inline-block;
+            margin-top: 32px;
+            padding: 12px 24px;
+            background: linear-gradient(45deg, var(--neon-cyan), var(--neon-pink));
+            color: var(--dark-bg);
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0, 255, 255, 0.5);
+        }
+
+        footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #333;
+            color: var(--text-secondary);
+            font-size: 8px;
+            text-align: center;
+            opacity: 0.7;
+        }
+
+        .status-message {
+            padding: 12px;
+            border-radius: 8px;
+            margin: 16px 0;
+            font-size: 9px;
+            text-align: center;
+            display: none;
+        }
+
+        .status-success {
+            background: rgba(0, 255, 0, 0.1);
+            border: 1px solid var(--success-green);
+            color: var(--success-green);
+        }
+
+        .status-error {
+            background: rgba(255, 0, 64, 0.1);
+            border: 1px solid var(--error-red);
+            color: var(--error-red);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                padding: 20px;
+            }
+            
+            h1 { font-size: 18px; }
+            h2 { font-size: 12px; }
+            
+            .support-topics {
+                grid-template-columns: 1fr;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Contact Retro Arcade</h1>
+        
+        <div class="contact-info">
+            <h2>Get in Touch</h2>
+            <div class="contact-method">
+                <strong>Email:</strong> support@retroarcade.com
+            </div>
+            <div class="contact-method">
+                <strong>Response Time:</strong> Within 24 hours
+            </div>
+            <div class="contact-method">
+                <strong>Support Hours:</strong> Monday - Friday, 9 AM - 6 PM EST
+            </div>
+        </div>
+
+        <h2>What Can We Help You With?</h2>
+        <div class="support-topics">
+            <div class="support-topic">
+                <h3>Account Issues</h3>
+                <p>Login problems, password resets, account deletion</p>
+            </div>
+            <div class="support-topic">
+                <h3>Subscription</h3>
+                <p>Billing questions, subscription management, refunds</p>
+            </div>
+            <div class="support-topic">
+                <h3>Game Progress</h3>
+                <p>Lost saves, score issues, technical problems</p>
+            </div>
+            <div class="support-topic">
+                <h3>Bug Reports</h3>
+                <p>Game bugs, website issues, feature requests</p>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2>Send Us a Message</h2>
+            <form id="contactForm">
+                <div class="form-group">
+                    <label for="name">Your Name:</label>
+                    <input type="text" id="name" name="name" required autocomplete="name">
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email Address:</label>
+                    <input type="email" id="email" name="email" required autocomplete="email">
+                </div>
+                
+                <div class="form-group">
+                    <label for="category">Issue Category:</label>
+                    <select id="category" name="category" required>
+                        <option value="">Select a category...</option>
+                        <option value="account">Account Issues</option>
+                        <option value="subscription">Subscription & Billing</option>
+                        <option value="technical">Technical Problems</option>
+                        <option value="games">Game Issues</option>
+                        <option value="privacy">Privacy & Security</option>
+                        <option value="feedback">Feedback & Suggestions</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="message">Describe your issue:</label>
+                    <textarea id="message" name="message" rows="6" required placeholder="Please provide as much detail as possible about your issue..."></textarea>
+                </div>
+
+                <div class="status-message" id="statusMessage"></div>
+                
+                <div class="button-group">
+                    <button type="submit" id="submitBtn">Send Message</button>
+                    <button type="reset">Clear Form</button>
+                </div>
+            </form>
+
+            <div class="form-note">
+                <strong>Note:</strong> This is currently a demo form. Messages are not actually sent. For real support, please email us directly at the address above.
+            </div>
+
+            <div class="alternative-contact">
+                <strong>Urgent Issues:</strong> For account security concerns or billing disputes, please email us directly for immediate assistance.
+            </div>
+        </div>
+
+        <a href="../arcade.html" class="back-button">&#8592; Back to Menu</a>
+    </div>
+
+    <footer>
+        &copy; 2025 Retro Arcade | All Rights Reserved
+    </footer>
+
+    <script>
+        // Demo form functionality
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const statusMessage = document.getElementById('statusMessage');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            // Simulate form submission
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Sending...';
+            
+            setTimeout(() => {
+                statusMessage.className = 'status-message status-error';
+                statusMessage.textContent = 'Demo mode: Message not sent. Please email us directly.';
+                statusMessage.style.display = 'block';
+                
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Send Message';
+                
+                // Hide message after 5 seconds
+                setTimeout(() => {
+                    statusMessage.style.display = 'none';
+                }, 5000);
+            }, 1500);
+        });
+
+        // Form reset functionality
+        document.querySelector('button[type="reset"]').addEventListener('click', function() {
+            document.getElementById('statusMessage').style.display = 'none';
+        });
+    </script>
+</body>
+</html>

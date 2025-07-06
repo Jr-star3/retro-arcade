@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Email Verification - Retro Arcade</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Press Start 2P', monospace;
+      background: #222;
+      color: #00ffff;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    .container {
+      max-width: 500px;
+      background: #181818;
+      border: 2px solid #00ffff;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 0 20px #00ffff44;
+    }
+    h1 {
+      color: #00ffff;
+      margin-bottom: 20px;
+      font-size: 20px;
+    }
+    .message {
+      margin: 20px 0;
+      padding: 15px;
+      border-radius: 8px;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+    .success {
+      background: #00ff8844;
+      border: 2px solid #00ff88;
+      color: #00ff88;
+    }
+    .error {
+      background: #ff004444;
+      border: 2px solid #ff0044;
+      color: #ff0044;
+    }
+    .loading {
+      background: #ffff0044;
+      border: 2px solid #ffff00;
+      color: #ffff00;
+    }
+    .btn {
+      background: #00ffff;
+      color: #222;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 10px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      margin: 10px;
+      transition: all 0.3s ease;
+    }
+    .btn:hover {
+      background: #ffff00;
+      transform: translateY(-2px);
+    }
+    .spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 2px solid #00ffff44;
+      border-top: 2px solid #00ffff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-right: 10px;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎮 Email Verification</h1>
+    
+    <div id="loadingMessage" class="message loading">
+      <span class="spinner"></span>
+      Verifying your email address...
+    </div>
+    
+    <div id="successMessage" class="message success" style="display: none;">
+      ✅ Email verified successfully!<br>
+      You can now log in and start playing games.
+    </div>
+    
+    <div id="errorMessage" class="message error" style="display: none;">
+      ❌ Verification failed.<br>
+      The link may be expired or invalid.
+    </div>
+    
+    <div id="actions" style="display: none;">
+      <a href="/index.html" class="btn">🏠 Go to Login</a>
+      <a href="/register.html" class="btn">📝 Register Again</a>
+    </div>
+  </div>
+
+  <script>
+    // Get token from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token');
+    
+    if (!token) {
+      showError('No verification token found in URL');
+      return;
+    }
+    
+    // Verify email
+    fetch(`/verify-email?token=${encodeURIComponent(token)}`)
+      .then(response => response.json())
+      .then(data => {
+        if (data.type === 'success') {
+          showSuccess(data.message);
+        } else {
+          showError(data.message || 'Verification failed');
+        }
+      })
+      .catch(error => {
+        console.error('Verification error:', error);
+        showError('Network error. Please try again.');
+      });
+    
+    function showSuccess(message) {
+      document.getElementById('loadingMessage').style.display = 'none';
+      document.getElementById('successMessage').style.display = 'block';
+      document.getElementById('successMessage').innerHTML = `✅ ${message}<br>You can now log in and start playing games.`;
+      document.getElementById('actions').style.display = 'block';
+    }
+    
+    function showError(message) {
+      document.getElementById('loadingMessage').style.display = 'none';
+      document.getElementById('errorMessage').style.display = 'block';
+      document.getElementById('errorMessage').innerHTML = `❌ ${message}<br>The link may be expired or invalid.`;
+      document.getElementById('actions').style.display = 'block';
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dominoes (Classic 2-Player)</title>
+    <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
+    <style>
+        body {
+            background: #222;
+            color: #fff;
+            font-family: 'Press Start 2P', monospace, cursive;
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: #181818;
+            border-radius: 16px;
+            box-shadow: 0 0 32px #0ff8, 0 0 8px #000a;
+            padding: 32px 32px 16px 32px;
+            margin-top: 40px;
+            position: relative;
+        }
+        .scoreboard {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 12px;
+            font-size: 11px;
+            background: #111;
+            border: 2px solid #0ff;
+            border-radius: 8px;
+            padding: 8px 16px;
+            color: #fff;
+            box-shadow: 0 0 8px #0ff4;
+            text-align: center;
+        }
+        .achievements {
+            background: #111;
+            border: 2px solid #0f0;
+            border-radius: 8px;
+            padding: 6px 12px;
+            margin: 8px 0;
+            font-size: 7px;
+            color: #0f0;
+            text-align: center;
+            min-height: 24px;
+        }
+        .achievement {
+            display: inline-block;
+            margin: 1px;
+            padding: 2px 4px;
+            background: #333;
+            border: 1px solid #0f0;
+            border-radius: 3px;
+            opacity: 0.3;
+            transition: all 0.3s ease;
+        }
+        .achievement.unlocked {
+            background: #0f0;
+            color: #222;
+            opacity: 1;
+            animation: achievementGlow 0.8s ease-in-out;
+        }
+        @keyframes achievementGlow {
+            0% { transform: scale(1); box-shadow: 0 0 4px #0f0; }
+            50% { transform: scale(1.1); box-shadow: 0 0 12px #0f0; }
+            100% { transform: scale(1); box-shadow: 0 0 6px #0f0; }
+        }
+        .difficulty-selector {
+            margin: 8px 0;
+            display: flex;
+            gap: 4px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .difficulty-btn {
+            background: #333;
+            color: #fff;
+            border: 1px solid #0ff;
+            border-radius: 4px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 8px;
+            padding: 4px 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .difficulty-btn:hover {
+            background: #0ff;
+            color: #222;
+        }
+        .difficulty-btn.active {
+            background: #0ff;
+            color: #222;
+            box-shadow: 0 0 6px #0ff;
+        }
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 255, 255, 0.95);
+            color: #222;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 10px;
+            z-index: 1000;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        .notification.show {
+            opacity: 1;
+            animation: slideDown 0.3s ease-out;
+        }
+        @keyframes slideDown {
+            from { transform: translateX(-50%) translateY(-100%); }
+            to { transform: translateX(-50%) translateY(0); }
+        }
+        .sound-toggle {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #333;
+            color: #0ff;
+            border: 1px solid #0ff;
+            border-radius: 4px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 8px;
+            padding: 4px 8px;
+            cursor: pointer;
+        }
+        .sound-toggle.on {
+            background: #0ff;
+            color: #222;
+        }
+        #dominoCanvas {
+            background: #111;
+            border: 6px solid #0ff;
+            border-radius: 8px;
+            image-rendering: pixelated;
+            box-shadow: 0 0 24px #0ff8;
+            margin-bottom: 16px;
+            display: block;
+        }
+        h1 {
+            margin-bottom: 20px;
+            text-shadow: 2px 2px #0ff, 0 0 8px #0ff8;
+            letter-spacing: 2px;
+        }
+        .instructions {
+            background: #222;
+            border: 2px solid #0ff;
+            border-radius: 8px;
+            padding: 10px 18px;
+            margin-top: 10px;
+            font-size: 12px;
+            color: #fff;
+            text-align: center;
+            box-shadow: 0 0 8px #0ff4;
+        }
+        .instructions span {
+            color: #0ff;
+        }
+        .btn-bar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .game-btn {
+            background: #0ff;
+            color: #222;
+            border: none;
+            border-radius: 6px;
+            font-family: 'Press Start 2P', monospace, cursive;
+            font-size: 10px;
+            padding: 6px 12px;
+            cursor: pointer;
+            box-shadow: 0 0 6px #0ff8;
+            transition: all 0.2s ease;
+        }
+        .game-btn:disabled {
+            background: #444;
+            color: #888;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        .game-btn:hover:not(:disabled) {
+            background: #ff0;
+            color: #222;
+            transform: translateY(-1px);
+        }
+        .game-btn:active:not(:disabled) {
+            transform: translateY(0px);
+        }
+        .game-btn.small {
+            font-size: 8px;
+            padding: 4px 8px;
+        }
+        a.menu-link {
+            color: #0ff;
+            display: block;
+            margin: 12px 0;
+            text-align: center;
+            text-decoration: none;
+        }
+        a.menu-link:hover {
+            text-decoration: underline;
+        }
+        footer {
+            margin-top: 24px;
+            color: #0ff;
+            font-size: 10px;
+            text-align: center;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="sound-toggle" id="soundToggle" onclick="toggleSound()">🔊</button>
+        <h1>Dominoes (Classic 2-Player)</h1>
+        
+        <div class="scoreboard">
+            <span id="playerScore">You: 0</span>
+            <span id="aiScore">AI: 0</span>
+            <span id="gameCount">Game: 1</span>
+        </div>
+        
+        <div class="achievements">
+            <div>🏆 Achievements</div>
+            <div id="achievementList">
+                <span class="achievement" id="firstWin">First Win</span>
+                <span class="achievement" id="perfectGame">Perfect Game</span>
+                <span class="achievement" id="comeback">Comeback</span>
+                <span class="achievement" id="speedRunner">Speed Runner</span>
+                <span class="achievement" id="strategist">Strategist</span>
+                <span class="achievement" id="persistent">Persistent</span>
+            </div>
+        </div>
+
+        <div class="difficulty-selector">
+            <button class="difficulty-btn" onclick="setDifficulty('easy')">Easy</button>
+            <button class="difficulty-btn active" onclick="setDifficulty('normal')">Normal</button>
+            <button class="difficulty-btn" onclick="setDifficulty('hard')">Hard</button>
+            <button class="difficulty-btn" onclick="setDifficulty('expert')">Expert</button>
+        </div>
+        
+        <div class="btn-bar">
+            <button class="game-btn" id="drawBtn">Draw</button>
+            <button class="game-btn small" id="hintBtn" onclick="showHint()">Hint</button>
+            <button class="game-btn small" id="passBtn" onclick="passTurn()">Pass</button>
+            <button class="game-btn small" onclick="newGame()">New Game</button>
+        </div>
+        
+        <canvas id="dominoCanvas" width="1000" height="320"></canvas>
+        
+        <div class="instructions">
+            <p>
+                Click a domino in your hand to play it.<br>
+                Match numbers on either end.<br>
+                If stuck, <span>Draw</span> from the boneyard until you can play or it's empty.<br>
+                <b>First to play all dominoes wins!<br>
+                If both stuck and deck is empty, lowest total wins.</b>
+            </p>
+        </div>
+        <a class="menu-link" href="../public/arcade.html">&#8592; Back to Menu</a>
+    </div>
+    
+    <div class="notification" id="notification"></div>
+    <footer>
+        <p>&copy; 2025 Your Name</p>
+    </footer>
+    <script>
+    // Enhanced Dominoes with comprehensive improvements
+    
+    // Sound system
+    let soundEnabled = true;
+    let audioContext;
+    
+    function initAudio() {
+        if (!audioContext) {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+    }
+    
+    function playSound(type, frequency = 440, duration = 100) {
+        if (!soundEnabled || !audioContext) return;
+        
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        switch(type) {
+            case 'place':
+                oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+                break;
+            case 'draw':
+                oscillator.frequency.setValueAtTime(330, audioContext.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(660, audioContext.currentTime + 0.1);
+                gainNode.gain.setValueAtTime(0.08, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+                break;
+            case 'win':
+                for(let i = 0; i < 5; i++) {
+                    setTimeout(() => {
+                        const osc = audioContext.createOscillator();
+                        const gain = audioContext.createGain();
+                        osc.connect(gain);
+                        gain.connect(audioContext.destination);
+                        osc.frequency.setValueAtTime(523 * Math.pow(2, i/5), audioContext.currentTime);
+                        gain.gain.setValueAtTime(0.1, audioContext.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                        osc.start();
+                        osc.stop(audioContext.currentTime + 0.3);
+                    }, i * 100);
+                }
+                return;
+            case 'error':
+                oscillator.frequency.setValueAtTime(220, audioContext.currentTime);
+                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+                break;
+        }
+        
+        oscillator.start();
+        oscillator.stop(audioContext.currentTime + duration/1000);
+    }
+    
+    function toggleSound() {
+        soundEnabled = !soundEnabled;
+        const btn = document.getElementById('soundToggle');
+        btn.textContent = soundEnabled ? '🔊' : '🔇';
+        btn.className = soundEnabled ? 'sound-toggle on' : 'sound-toggle';
+        showNotification(soundEnabled ? 'Sound ON' : 'Sound OFF');
+    }
+
+    // Game creation functions
+    function createDominoSet() {
+        const set = [];
+        for (let i = 0; i <= 6; i++) {
+            for (let j = i; j <= 6; j++) {
+                set.push([i, j]);
+            }
+        }
+        return set;
+    }
+
+    function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    function drawRoundedRect(ctx, x, y, w, h, r) {
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.lineTo(x + w - r, y);
+        ctx.arcTo(x + w, y, x + w, y + r, r);
+        ctx.lineTo(x + w, y + h - r);
+        ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
+        ctx.lineTo(x + r, y + h);
+        ctx.arcTo(x, y + h, x, y + h - r, r);
+        ctx.lineTo(x, y + r);
+        ctx.arcTo(x, y, x + r, y, r);
+        ctx.closePath();
+    }
+
+    // Game state
+    let dominoSet, playerHand, aiHand, board, deck, currentPlayer, selected, gameOver, message, stuckCount;
+    let gameStartTime, animatingDomino = null, particles = [];
+    let difficulty = 'normal', roundNumber = 1;
+    
+    // Statistics and achievements
+    let stats = {
+        gamesPlayed: 0,
+        playerWins: 0,
+        aiWins: 0,
+        perfectGames: 0,
+        fastestWin: null,
+        dominoesPlayed: 0,
+        comebacks: 0
+    };
+    
+    let achievements = {
+        firstWin: false,
+        perfectGame: false,
+        comeback: false,
+        speedRunner: false,
+        strategist: false,
+        persistent: false
+    };
+    
+    // AI difficulty settings
+    const AI_SETTINGS = {
+        easy: { thinkTime: 1000, smartMoves: 0.3, blocksPlayer: 0.1 },
+        normal: { thinkTime: 700, smartMoves: 0.6, blocksPlayer: 0.3 },
+        hard: { thinkTime: 500, smartMoves: 0.8, blocksPlayer: 0.6 },
+        expert: { thinkTime: 300, smartMoves: 0.95, blocksPlayer: 0.9 }
+    };
+
+    const canvas = document.getElementById('dominoCanvas');
+    const ctx = canvas.getContext('2d');
+    const drawBtn = document.getElementById('drawBtn');
+    const hintBtn = document.getElementById('hintBtn');
+    const passBtn = document.getElementById('passBtn');
+
+    // Load saved data
+    function loadData() {
+        const savedStats = localStorage.getItem('dominoesStats');
+        const savedAchievements = localStorage.getItem('dominoesAchievements');
+        const savedSound = localStorage.getItem('dominoesSound');
+        
+        if (savedStats) stats = {...stats, ...JSON.parse(savedStats)};
+        if (savedAchievements) achievements = {...achievements, ...JSON.parse(savedAchievements)};
+        if (savedSound !== null) soundEnabled = JSON.parse(savedSound);
+        
+        updateAchievementsDisplay();
+        updateScoreboard();
+    }
+    
+    function saveData() {
+        localStorage.setItem('dominoesStats', JSON.stringify(stats));
+        localStorage.setItem('dominoesAchievements', JSON.stringify(achievements));
+        localStorage.setItem('dominoesSound', JSON.stringify(soundEnabled));
+    }
+    
+    // Notifications
+    function showNotification(message, duration = 2000) {
+        const notification = document.getElementById('notification');
+        notification.textContent = message;
+        notification.className = 'notification show';
+        
+        setTimeout(() => {
+            notification.className = 'notification';
+        }, duration);
+    }
+    
+    // Particle system
+    function createParticles(x, y, color, count = 8) {
+        for(let i = 0; i < count; i++) {
+            particles.push({
+                x: x,
+                y: y,
+                vx: (Math.random() - 0.5) * 6,
+                vy: (Math.random() - 0.5) * 6,
+                life: 30,
+                maxLife: 30,
+                color: color,
+                size: Math.random() * 2 + 1
+            });
+        }
+    }
+    
+    function updateParticles() {
+        particles = particles.filter(p => {
+            p.x += p.vx;
+            p.y += p.vy;
+            p.vy += 0.2; // gravity
+            p.life--;
+            return p.life > 0;
+        });
+    }
+    
+    function drawParticles() {
+        particles.forEach(p => {
+            ctx.save();
+            ctx.globalAlpha = p.life / p.maxLife;
+            ctx.fillStyle = p.color;
+            ctx.fillRect(p.x, p.y, p.size, p.size);
+            ctx.restore();
+        });
+    }
+    
+    // Difficulty system
+    function setDifficulty(level) {
+        difficulty = level;
+        document.querySelectorAll('.difficulty-btn').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+        showNotification(`Difficulty: ${level.toUpperCase()}`);
+    }
+    
+    // Achievement system
+    function checkAchievements() {
+        let newAchievements = [];
+        
+        if (!achievements.firstWin && stats.playerWins >= 1) {
+            achievements.firstWin = true;
+            newAchievements.push('First Win - Victory achieved!');
+        }
+        
+        if (!achievements.persistent && stats.gamesPlayed >= 10) {
+            achievements.persistent = true;
+            newAchievements.push('Persistent - Played 10 games!');
+        }
+        
+        if (!achievements.speedRunner && gameStartTime && Date.now() - gameStartTime < 60000) {
+            achievements.speedRunner = true;
+            newAchievements.push('Speed Runner - Won in under 1 minute!');
+        }
+        
+        newAchievements.forEach((msg, index) => {
+            setTimeout(() => {
+                showNotification(msg, 3000);
+            }, index * 1000);
+        });
+        
+        updateAchievementsDisplay();
+        saveData();
+    }
+    
+    function updateAchievementsDisplay() {
+        Object.keys(achievements).forEach(key => {
+            const element = document.getElementById(key);
+            if (element) {
+                element.className = achievements[key] ? 'achievement unlocked' : 'achievement';
+            }
+        });
+    }
+    
+    function updateScoreboard() {
+        document.getElementById('playerScore').textContent = `You: ${stats.playerWins}`;
+        document.getElementById('aiScore').textContent = `AI: ${stats.aiWins}`;
+        document.getElementById('gameCount').textContent = `Game: ${roundNumber}`;
+    }
+
+    function handTotal(hand) {
+        return hand.reduce((sum, d) => sum + d[0] + d[1], 0);
+    }
+    
+    // Hint system
+    function showHint() {
+        if (gameOver || currentPlayer !== "player") return;
+        
+        const playableDominoes = playerHand.map((domino, index) => ({domino, index}))
+            .filter(({domino}) => canPlay(domino));
+        
+        if (playableDominoes.length === 0) {
+            showNotification("No playable dominoes - try drawing!");
+            return;
+        }
+        
+        // Simple hint: suggest a playable domino
+        const suggestion = playableDominoes[0];
+        const domino = suggestion.domino;
+        showNotification(`Try playing [${domino[0]}|${domino[1]}]`);
+        
+        // Briefly highlight the suggested domino
+        selected = suggestion.index;
+        draw();
+        setTimeout(() => {
+            selected = null;
+            draw();
+        }, 1500);
+    }
+    
+    function passTurn() {
+        if (gameOver || currentPlayer !== "player") return;
+        
+        // Can only pass if no playable dominoes and deck is empty
+        const hasPlayable = playerHand.some(canPlay);
+        if (hasPlayable) {
+            showNotification("You have playable dominoes!");
+            playSound('error');
+            return;
+        }
+        
+        if (deck.length > 0) {
+            showNotification("Must draw from deck first!");
+            playSound('error');
+            return;
+        }
+        
+        message = "You passed. AI's turn!";
+        currentPlayer = "ai";
+        stuckCount++;
+        updateButtons();
+        draw();
+        checkStalemate();
+        if (!gameOver) aiMove();
+    }
+
+    function startGame() {
+        dominoSet = shuffle(createDominoSet());
+        playerHand = dominoSet.splice(0, 7);
+        aiHand = dominoSet.splice(0, 7);
+        deck = dominoSet;
+        board = [];
+        selected = null;
+        gameOver = false;
+        message = "";
+        stuckCount = 0;
+        gameStartTime = Date.now();
+        particles = [];
+        animatingDomino = null;
+
+        // Find highest double
+        let highestDouble = -1, starter = null, starterIdx = -1, starterPlayer = null;
+        for (let d = 6; d >= 0; d--) {
+            for (let i = 0; i < playerHand.length; i++) {
+                if (playerHand[i][0] === d && playerHand[i][1] === d) {
+                    highestDouble = d;
+                    starter = playerHand[i];
+                    starterIdx = i;
+                    starterPlayer = "player";
+                    break;
+                }
+            }
+            for (let i = 0; i < aiHand.length; i++) {
+                if (aiHand[i][0] === d && aiHand[i][1] === d) {
+                    if (d > highestDouble) {
+                        highestDouble = d;
+                        starter = aiHand[i];
+                        starterIdx = i;
+                        starterPlayer = "ai";
+                    }
+                    break;
+                }
+            }
+            if (highestDouble !== -1) break;
+        }
+        
+        if (starterPlayer === "player") {
+            board = [starter];
+            playerHand.splice(starterIdx, 1);
+            currentPlayer = "ai";
+            message = "You start with [" + highestDouble + "|" + highestDouble + "]. AI's turn.";
+        } else if (starterPlayer === "ai") {
+            board = [starter];
+            aiHand.splice(starterIdx, 1);
+            currentPlayer = "player";
+            message = "AI starts with [" + highestDouble + "|" + highestDouble + "]. Your turn.";
+        } else {
+            // No double found, pick random starter
+            board = [playerHand[0]];
+            playerHand.splice(0, 1);
+            currentPlayer = "ai";
+            message = "No double found. You start.";
+        }
+        
+        updateButtons();
+        draw();
+        initAudio();
+        if (currentPlayer === "ai" && !gameOver) {
+            setTimeout(aiMove, AI_SETTINGS[difficulty].thinkTime);
+        }
+    }
+    
+    function newGame() {
+        stats.gamesPlayed++;
+        roundNumber++;
+        updateScoreboard();
+        startGame();
+    }
+
+    function drawDomino(domino, x, y, highlight = false, half = false, theme = 'classic') {
+        ctx.save();
+        ctx.translate(x, y);
+        
+        // Enhanced domino appearance
+        ctx.strokeStyle = highlight ? "#ff0" : "#0ff";
+        ctx.lineWidth = highlight ? 4 : 2;
+        
+        // Gradient background
+        const gradient = ctx.createLinearGradient(0, 0, 40, 80);
+        gradient.addColorStop(0, '#333');
+        gradient.addColorStop(1, '#222');
+        ctx.fillStyle = gradient;
+        
+        if (half) {
+            drawRoundedRect(ctx, 0, 0, 40, 40, 8);
+        } else {
+            drawRoundedRect(ctx, 0, 0, 40, 80, 8);
+        }
+        ctx.fill();
+        ctx.stroke();
+
+        // Add shine effect
+        ctx.fillStyle = "rgba(255,255,255,0.2)";
+        if (half) {
+            ctx.fillRect(2, 2, 36, 6);
+        } else {
+            ctx.fillRect(2, 2, 36, 12);
+        }
+
+        // Draw divider line
+        if (!half) {
+            ctx.strokeStyle = "#0ff";
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(4, 40);
+            ctx.lineTo(36, 40);
+            ctx.stroke();
+        }
+
+        ctx.fillStyle = "#fff";
+        if (half) {
+            drawPips(domino[0], 20, 20);
+        } else {
+            drawPips(domino[0], 20, 24);
+            drawPips(domino[1], 20, 56);
+        }
+        ctx.restore();
+    }
+
+    function drawPips(num, cx, cy) {
+        const pip = (dx, dy) => {
+            ctx.beginPath();
+            ctx.arc(cx + dx, cy + dy, 4, 0, 2 * Math.PI);
+            ctx.fill();
+        };
+        if ([1,3,5].includes(num)) pip(0,0);
+        if ([2,3,4,5,6].includes(num)) { pip(-10,-10); pip(10,10);}
+        if ([4,5,6].includes(num)) { pip(10,-10); pip(-10,10);}
+        if ([6].includes(num)) { pip(-10,0); pip(10,0);}
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Background pattern
+        ctx.fillStyle = "rgba(0,255,255,0.05)";
+        for(let i = 0; i < 50; i++) {
+            ctx.fillRect(Math.random() * canvas.width, Math.random() * canvas.height, 1, 1);
+        }
+
+        // Draw board dominoes with better positioning
+        let totalWidth = board.length * 44 - 4;
+        let bx = (canvas.width - totalWidth) / 2;
+        let by = 110;
+        for (let i = 0; i < board.length; i++) {
+            let half = (i === 0 || i === board.length-1);
+            drawDomino(board[i], bx + i*44, by, false, half);
+        }
+
+        // Draw player's hand with better spacing and hover effects
+        let handStartX = 30;
+        let handSpacing = Math.min(60, (canvas.width - 60) / Math.max(playerHand.length, 1));
+        for (let i = 0; i < playerHand.length; i++) {
+            let px = handStartX + i * handSpacing;
+            let py = 220;
+            let highlight = selected === i || (canPlay(playerHand[i]) && currentPlayer === "player");
+            drawDomino(playerHand[i], px, py, highlight);
+            
+            // Show playability indicator
+            if (canPlay(playerHand[i]) && currentPlayer === "player") {
+                ctx.fillStyle = "rgba(0,255,0,0.3)";
+                ctx.fillRect(px-2, py-2, 44, 84);
+            }
+        }
+
+        // Draw AI hand with improved back design
+        for (let i = 0; i < aiHand.length; i++) {
+            let px = 60 + i*50;
+            let py = 10;
+            ctx.save();
+            ctx.translate(px, py);
+            ctx.strokeStyle = "#0ff";
+            ctx.lineWidth = 2;
+            
+            const gradient = ctx.createLinearGradient(0, 0, 40, 80);
+            gradient.addColorStop(0, '#444');
+            gradient.addColorStop(1, '#333');
+            ctx.fillStyle = gradient;
+            
+            drawRoundedRect(ctx, 0, 0, 40, 80, 8);
+            ctx.fill();
+            ctx.stroke();
+            
+            // Pattern on back
+            ctx.strokeStyle = "#666";
+            ctx.lineWidth = 1;
+            for(let j = 0; j < 3; j++) {
+                ctx.beginPath();
+                ctx.moveTo(8, 20 + j*20);
+                ctx.lineTo(32, 20 + j*20);
+                ctx.stroke();
+            }
+            
+            ctx.restore();
+        }
+
+        // Enhanced deck display
+        let deckHeight = Math.min(deck.length * 2, 40);
+        for (let i = 0; i < Math.min(deck.length, 20); i++) {
+            let px = 900;
+            let py = 60 + i * 2;
+            ctx.save();
+            ctx.translate(px, py);
+            ctx.strokeStyle = "#0ff";
+            ctx.lineWidth = 2;
+            ctx.fillStyle = "#444";
+            drawRoundedRect(ctx, 0, 0, 40, 80, 8);
+            ctx.fill();
+            ctx.stroke();
+            ctx.restore();
+        }
+        
+        // Deck info with better styling
+        ctx.font = "10px 'Press Start 2P'";
+        ctx.fillStyle = "#0ff";
+        ctx.textAlign = "left";
+        ctx.fillText("Deck: " + deck.length, 900, 50);
+        
+        // Hand totals
+        ctx.font = "8px 'Press Start 2P'";
+        ctx.fillStyle = "#fff";
+        ctx.fillText("Your total: " + handTotal(playerHand), 30, 315);
+        ctx.fillText("AI total: " + handTotal(aiHand), 60, 105);
+
+        // Enhanced message display
+        ctx.font = "12px 'Press Start 2P'";
+        ctx.fillStyle = "#fff";
+        ctx.textAlign = "left";
+        ctx.fillText(message, 20, 100);
+        
+        // Turn indicator
+        ctx.fillStyle = currentPlayer === "player" ? "#0f0" : "#f80";
+        ctx.fillText(currentPlayer === "player" ? "YOUR TURN" : "AI THINKING...", 20, 85);
+
+        // Draw particles
+        drawParticles();
+
+        // Game over screen with better styling
+        if (gameOver) {
+            // Semi-transparent overlay
+            ctx.fillStyle = "rgba(0,0,0,0.7)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.font = "24px 'Press Start 2P'";
+            ctx.fillStyle = "#ff0";
+            ctx.textAlign = "center";
+            ctx.fillText(message, canvas.width/2, 150);
+            
+            ctx.font = "12px 'Press Start 2P'";
+            ctx.fillStyle = "#fff";
+            ctx.fillText("Press 'New Game' or 'R' to play again", canvas.width/2, 180);
+            
+            // Show game stats
+            const gameTime = Math.round((Date.now() - gameStartTime) / 1000);
+            ctx.fillText(`Game time: ${gameTime}s`, canvas.width/2, 200);
+        }
+        
+        updateParticles();
+    }
+
+    function canPlay(domino) {
+        if (board.length === 0) return true;
+        const left = board[0][0], right = board[board.length-1][1];
+        return domino[0] === left || domino[1] === left || domino[0] === right || domino[1] === right;
+    }
+
+    function playDomino(hand, idx) {
+        const domino = hand[idx];
+        if (board.length === 0) {
+            board.push(domino);
+        } else {
+            const left = board[0][0], right = board[board.length-1][1];
+            if (domino[0] === left) {
+                board.unshift([domino[1], domino[0]]);
+            } else if (domino[1] === left) {
+                board.unshift(domino);
+            } else if (domino[0] === right) {
+                board.push(domino);
+            } else if (domino[1] === right) {
+                board.push([domino[1], domino[0]]);
+            } else {
+                return false;
+            }
+        }
+        hand.splice(idx, 1);
+        stats.dominoesPlayed++;
+        
+        // Create particles at placement
+        const bx = canvas.width/2 - board.length*22 + board.length*44;
+        createParticles(bx, 110, "#0ff", 5);
+        
+        return true;
+    }
+
+    function aiMove() {
+        setTimeout(() => {
+            const settings = AI_SETTINGS[difficulty];
+            let bestMove = null;
+            let bestScore = -1;
+            
+            // Smart AI: evaluate moves
+            if (Math.random() < settings.smartMoves) {
+                for (let i = 0; i < aiHand.length; i++) {
+                    if (canPlay(aiHand[i])) {
+                        let score = 0;
+                        const domino = aiHand[i];
+                        
+                        // Prefer playing higher value dominoes
+                        score += domino[0] + domino[1];
+                        
+                        // Prefer doubles
+                        if (domino[0] === domino[1]) score += 5;
+                        
+                        // Try to block player if possible
+                        if (Math.random() < settings.blocksPlayer) {
+                            // Check if this move would limit player options
+                            score += 3;
+                        }
+                        
+                        if (score > bestScore) {
+                            bestScore = score;
+                            bestMove = i;
+                        }
+                    }
+                }
+            } else {
+                // Random move for easier difficulty
+                for (let i = 0; i < aiHand.length; i++) {
+                    if (canPlay(aiHand[i])) {
+                        bestMove = i;
+                        break;
+                    }
+                }
+            }
+            
+            if (bestMove !== null) {
+                playDomino(aiHand, bestMove);
+                playSound('place', 660, 150);
+                message = "Your turn!";
+                currentPlayer = "player";
+                stuckCount = 0;
+                checkGameOver();
+                updateButtons();
+                draw();
+                return;
+            }
+            
+            // If can't play, draw until can or deck empty
+            while (deck.length > 0) {
+                aiHand.push(deck.pop());
+                playSound('draw');
+                for (let i = 0; i < aiHand.length; i++) {
+                    if (canPlay(aiHand[i])) {
+                        playDomino(aiHand, i);
+                        playSound('place', 660, 150);
+                        message = "Your turn!";
+                        currentPlayer = "player";
+                        stuckCount = 0;
+                        checkGameOver();
+                        updateButtons();
+                        draw();
+                        return;
+                    }
+                }
+            }
+            
+            // If can't play and deck empty, pass turn
+            message = "AI is stuck. Your turn!";
+            currentPlayer = "player";
+            stuckCount++;
+            updateButtons();
+            draw();
+            checkStalemate();
+        }, AI_SETTINGS[difficulty].thinkTime);
+    }
+
+    function checkGameOver() {
+        if (playerHand.length === 0) {
+            message = "🎉 You win! 🎉";
+            gameOver = true;
+            stats.playerWins++;
+            playSound('win');
+            createParticles(canvas.width/2, canvas.height/2, "#0f0", 20);
+            checkAchievements();
+            updateButtons();
+            updateScoreboard();
+            saveData();
+        } else if (aiHand.length === 0) {
+            message = "AI wins! Better luck next time.";
+            gameOver = true;
+            stats.aiWins++;
+            updateButtons();
+            updateScoreboard();
+            saveData();
+        }
+    }
+
+    function checkStalemate() {
+        if (stuckCount >= 2) {
+            const playerTotal = handTotal(playerHand);
+            const aiTotal = handTotal(aiHand);
+            if (playerTotal < aiTotal) {
+                message = "🎉 Stalemate! You win! (total: " + playerTotal + " vs " + aiTotal + ")";
+                stats.playerWins++;
+                playSound('win');
+                checkAchievements();
+            } else if (aiTotal < playerTotal) {
+                message = "Stalemate! AI wins (total: " + aiTotal + " vs " + playerTotal + ")";
+                stats.aiWins++;
+            } else {
+                message = "Stalemate! It's a draw (" + playerTotal + " each)";
+            }
+            gameOver = true;
+            updateButtons();
+            updateScoreboard();
+            saveData();
+        }
+    }
+
+    // Event handlers
+    canvas.addEventListener('click', function(e) {
+        if (gameOver || currentPlayer !== "player") return;
+        
+        const rect = canvas.getBoundingClientRect();
+        const mx = e.clientX - rect.left;
+        const my = e.clientY - rect.top;
+        
+        let handStartX = 30;
+        let handSpacing = Math.min(60, (canvas.width - 60) / Math.max(playerHand.length, 1));
+        
+        for (let i = 0; i < playerHand.length; i++) {
+            let px = handStartX + i * handSpacing, py = 220;
+            if (mx >= px && mx <= px+40 && my >= py && my <= py+80) {
+                if (canPlay(playerHand[i])) {
+                    playDomino(playerHand, i);
+                    playSound('place', 880, 120);
+                    message = "AI's turn...";
+                    currentPlayer = "ai";
+                    stuckCount = 0;
+                    checkGameOver();
+                    updateButtons();
+                    draw();
+                    if (!gameOver) aiMove();
+                } else {
+                    message = "Can't play that domino!";
+                    playSound('error');
+                    draw();
+                }
+                return;
+            }
+        }
+    });
+
+    // Enhanced hover effects
+    canvas.addEventListener('mousemove', function(e) {
+        if (gameOver || currentPlayer !== "player") return;
+        
+        const rect = canvas.getBoundingClientRect();
+        const mx = e.clientX - rect.left;
+        const my = e.clientY - rect.top;
+        
+        let handStartX = 30;
+        let handSpacing = Math.min(60, (canvas.width - 60) / Math.max(playerHand.length, 1));
+        let newSelected = null;
+        
+        for (let i = 0; i < playerHand.length; i++) {
+            let px = handStartX + i * handSpacing, py = 220;
+            if (mx >= px && mx <= px+40 && my >= py && my <= py+80) {
+                if (canPlay(playerHand[i])) {
+                    newSelected = i;
+                }
+                break;
+            }
+        }
+        
+        if (newSelected !== selected) {
+            selected = newSelected;
+            draw();
+        }
+    });
+
+    drawBtn.onclick = function() {
+        if (gameOver || currentPlayer !== "player" || deck.length === 0) return;
+        
+        playerHand.push(deck.pop());
+        playSound('draw');
+        message = "You drew a domino.";
+        updateButtons();
+        draw();
+        
+        // Check if newly drawn domino is playable
+        setTimeout(() => {
+            for (let i = 0; i < playerHand.length; i++) {
+                if (canPlay(playerHand[i])) return;
+            }
+            
+            // If still can't play and deck is empty, pass turn
+            if (deck.length === 0 && !playerHand.some(canPlay)) {
+                message = "You are stuck. AI's turn!";
+                currentPlayer = "ai";
+                stuckCount++;
+                updateButtons();
+                draw();
+                checkStalemate();
+                if (!gameOver) aiMove();
+            }
+        }, 500);
+    };
+
+    function updateButtons() {
+        drawBtn.disabled = !(currentPlayer === "player" && deck.length > 0 && !gameOver);
+        hintBtn.disabled = !(currentPlayer === "player" && !gameOver);
+        passBtn.disabled = !(currentPlayer === "player" && !gameOver);
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (gameOver && (e.key === 'r' || e.key === 'R')) {
+            newGame();
+        }
+        if (e.key === 'h' || e.key === 'H') {
+            showHint();
+        }
+    });
+
+    // Initialize game
+    loadData();
+    startGame();
+    </script>
+</body>
+</html>
