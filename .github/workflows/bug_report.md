@@ -1,9 +1,10 @@
 ---
-name: Bug Report
+name: Bug report
 about: Create a report to help us improve
-title: '[BUG] '
-labels: bug
+title: ''
+labels: ''
 assignees: ''
+
 ---
 
 **Describe the bug**
@@ -22,15 +23,10 @@ A clear and concise description of what you expected to happen.
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
 
-**Browser/Device Info:**
- - OS: [e.g. Windows 10, macOS, iOS]
- - Browser: [e.g. Chrome, Firefox, Safari]
- - Version: [e.g. 22]
- - Device: [e.g. Desktop, iPhone 12, iPad]
-
-**Game-specific (if applicable)**
-- Which game: [e.g. Tetris, Snake]
-- Game state when bug occurred: [e.g. high score, level 5]
+**Desktop (please complete the following information):**
+ - OS: [e.g. iOS]
+ - Browser [e.g. chrome, safari]
+ - Version [e.g. 22]
 
 **Additional context**
 Add any other context about the problem here.
