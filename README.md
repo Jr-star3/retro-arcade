@@ -7,7 +7,7 @@ See the full arcade experience in action - from menu navigation to gameplay.
 
 ## 🌐 Live Demo
 
-🎮 **[Try it live here!](https://your-demo-url.com)** 
+🎮 **[Try it live here!](https://retrogame.tech)** 
 
 Experience all games instantly - no installation required! The demo includes:
 - ✅ Full game collection (10+ games)
@@ -16,11 +16,9 @@ Experience all games instantly - no installation required! The demo includes:
 - ✅ Mobile-responsive design
 - ✅ All features currently free during launch
 
-> **Note**: Replace `https://your-demo-url.com` with your actual deployment URL once hosted.
-
 ## 🚀 Quick Startogies**
 
-[![Live Demo](https://img.shields.io/badge/🎮-Play%20Now-brightgreen?style=for-the-badge)](https://your-demo-url.com)
+[![Live Demo](https://img.shields.io/badge/🎮-Play%20Now-brightgreen?style=for-the-badge)](https://retrogame.tech)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 [![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
 [![Express.js](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)
@@ -359,8 +357,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 <div align="center">
 
-**[🎮 Play Now](https://your-demo-link.com) | [📖 Documentation](https://github.com/Jr-star3/retro-arcade#readme) | [🤝 Contribute](CONTRIBUTING.md)**
+**[🎮 Play Now](https://retrogame.tech) | [📖 Documentation](https://github.com/Jr-star3/retro-arcade#readme) | [🤝 Contribute](CONTRIBUTING.md)**
 
 Made with ❤️ for retro gaming enthusiasts
+
+</div>
 
 </div>
