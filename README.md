@@ -1,9 +1,13 @@
 # 🕹️ Retro Arcade Collection
 
 **A nostalgic collection of classic arcade games built with modern web t### 🎬 Interactive Demo
-See the full arcade experience in action - from menu navigation to gameplay.
 
-![Arcade Demo](screenshots/Retro%20Arcade%20Menu%20-%20Personal%20-%20Microsoft_%20Edge%202025-07-05%2020-27-50.mp4.gif)
+## 🎬 Interactive Demo
+See the arcade experience in action—menu navigation and gameplay:
+
+![Towers of Hanoi and Back to Menu](screenshots/Retro Arcade Menu and 2 more pages - Personal - Microsoft_ Edge 2025-07-13 17-03-35.mp4.gif)
+
+![Tic Tac Toe Gameplay Demo](screenshots/Tic Tac Toe Pro - Personal - Microsoft_ Edge 2025-07-13 18-04-29.mp4.gif)
 
 ## 🌐 Live Demo
 
