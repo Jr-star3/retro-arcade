@@ -5,22 +5,19 @@ This directory contains visual assets for the GitHub repository and README.
 ## File Organization
 
 ### Main Screenshots (for README)
-- `arcade-menu.png` - Main game selection screen
-- `tetris-gameplay.png` - Tetris game in action
-- `snake-gameplay.png` - Snake game in action
-- `breakout-gameplay.png` - Breakout game in action
-- `login-screen.png` - Login/registration page
-- `responsive-mobile.png` - Mobile view showcase
+- `arcade-menu1.png` - Main game selection screen
+- `dominoes-gameplay.jpg` - Dominoes gameplay
+- `retrogame-gameplay.jpg` - Retro Game gameplay
+- `towerofhanoi-gameplay.png` - Towers of Hanoi gameplay
+- `tictactoe-gameplay.png` - Tic-Tac-Toe gameplay
+- `user-registration.png` - Login/registration page
 
 ### GIFs (for dynamic previews)
-- `tetris-demo.gif` - Short Tetris gameplay loop
-- `snake-demo.gif` - Snake gameplay demonstration
-- `arcade-navigation.gif` - Navigating through the arcade
+- `Retro Arcade Menu and 2 more pages - Personal - Microsoft_ Edge 2025-07-13 17-03-35.mp4.gif` - Towers of Hanoi played and back to menu
+- `Tic Tac Toe Pro - Personal - Microsoft_ Edge 2025-07-13 18-04-29.mp4.gif` - Tic Tac Toe gameplay demo
 
 ### Optional Marketing Assets
-- `logo.png` - Project logo (if created)
-- `banner.png` - Repository banner image
-- `feature-showcase.png` - Collage of all games
+# (Add if you create logo, banner, or feature showcase)
 
 ## Recommended Dimensions
 
@@ -53,7 +50,6 @@ This directory contains visual assets for the GitHub repository and README.
 Screenshots will be referenced in README.md like:
 ```markdown
 ![Arcade Menu](screenshots/arcade-menu.png)
-![Tetris Gameplay](screenshots/tetris-gameplay.png)
 ```
 
 ## GitHub Best Practices
