@@ -9,8 +9,9 @@ See the full arcade experience in action - from menu navigation to gameplay.
 
 🎮 **[Try it live here!](https://retrogame.tech)** 
 
-Experience all games instantly - no installation required! The demo includes:
-- ✅ Full game collection (10+ games)
+Experience the available games instantly - no installation required! The demo includes:
+- ✅ Retro Game and Dominoes (free)
+- ✅ Towers of Hanoi and Tic Tac Toe (premium/coming soon)
 - ✅ User registration and login
 - ✅ Progress tracking and high scores  
 - ✅ Mobile-responsive design
@@ -23,7 +24,7 @@ Experience all games instantly - no installation required! The demo includes:
 [![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
 [![Express.js](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)
 
-> 🎯 **Play iconic games like Snake, Tetris, Breakout, and more with user accounts, progress tracking, and achievements!**
+> 🎯 **Play original retro-inspired games with user accounts, progress tracking, and achievements!**
 
 ---
 
@@ -48,16 +49,10 @@ Experience all games instantly - no installation required! The demo includes:
 
 | Game | Description | Features | Difficulty |
 |------|-------------|----------|------------|
-| 🧩 **Tetris** | Block-stacking puzzle perfection | T-spins, combos, modern mechanics | ⭐⭐⭐ |
-| 🐍 **Snake** | The timeless mobile classic | Smooth controls, retro styling | ⭐⭐ |
-| 🧱 **Breakout** | Paddle & ball brick-breaking action | Physics-based gameplay | ⭐⭐ |
-| 🏓 **Pong** | The original arcade tennis | Classic two-player mode | ⭐ |
-| 💣 **Minesweeper** | Logic-based mine detection | Multiple difficulty levels | ⭐⭐⭐ |
-| 🧠 **Memory Game** | Card matching challenge | Concentration training | ⭐ |
-| ⭕ **Tic-Tac-Toe** | Strategic grid warfare | AI opponent | ⭐ |
-| 🗼 **Towers of Hanoi** | Ancient mathematical puzzle | Multiple disk configurations | ⭐⭐⭐ |
-| 🎲 **Dominoes** | Classic tile matching | Authentic rules | ⭐⭐ |
 | 🎯 **Retro Game** | Custom arcade experience | Unique mechanics | ⭐⭐ |
+| 🎲 **Dominoes** | Classic tile matching | Authentic rules | ⭐⭐ |
+| 🗼 **Towers of Hanoi** | Ancient mathematical puzzle | Multiple disk configurations | ⭐⭐⭐ |  
+| ⭕ **Tic-Tac-Toe** | Strategic grid warfare | AI opponent | ⭐ |  
 
 ### 🔐 User System
 - Secure registration and login
@@ -85,48 +80,30 @@ Experience all games instantly - no installation required! The demo includes:
 
 ## � Screenshots & Demos
 
+
 ### 🎮 Main Arcade Menu
-Experience the retro-styled game selection interface with neon effects and smooth animations.
-
-![Arcade Menu](screenshots/arcade-menu.png)
-
-### 🧩 Tetris - Enhanced Classic
-Modern Tetris with combo system, T-spins, and particle effects while maintaining the classic feel.
-
-![Tetris Gameplay](screenshots/tetris-gameplay.png)
-
-**Live Demo:**
-![Tetris Demo](screenshots/Tetris%20-%20Personal%20-%20Microsoft_%20Edge%202025-07-05%2020-28-41.mp4.gif)
-
-### 🐍 Snake Game
-Classic Snake with smooth controls and retro pixel art styling.
-
-![Snake Gameplay](screenshots/snake-gameplay.png)
-
-### 🧱 Breakout Action
-Paddle and ball physics with satisfying brick-breaking mechanics.
-
-![Breakout Gameplay](screenshots/breakout-gameplay.jpg)
+![Arcade Menu](screenshots/arcade-menu1.png)
 
 ### 🎲 Dominoes Game
-Strategic tile matching with authentic domino gameplay.
-
 ![Dominoes Gameplay](screenshots/dominoes-gameplay.jpg)
 
 ### 🎯 Retro Game Special
-Custom retro-style arcade game with unique mechanics.
-
 ![Retro Game](screenshots/retrogame-gameplay.jpg)
 
-### 👤 User Registration
-Secure user system with clean, accessible registration interface.
+### 🗼 Towers of Hanoi
+![Towers of Hanoi Gameplay](screenshots/towerofhanoi-gameplay.png)
 
+### ⭕ Tic-Tac-Toe
+![Tic-Tac-Toe Gameplay](screenshots/tictactoe-gameplay.png)
+
+### 👤 User Registration
 ![User Registration](screenshots/user-registration.png)
 
 ### 🎬 Interactive Demo
-See the full arcade experience in action - from menu navigation to gameplay.
 
-![Arcade Demo](screenshots/Retro%20Arcade%20Menu%20-%20Personal%20-%20Microsoft_%20Edge%202025-07-05%2020-27-50.mp4.gif)
+![Towers of Hanoi and Back to Menu](screenshots/Retro Arcade Menu and 2 more pages - Personal - Microsoft_ Edge 2025-07-13 17-03-35.mp4.gif)
+
+![Tic Tac Toe Gameplay Demo](screenshots/Tic Tac Toe Pro - Personal - Microsoft_ Edge 2025-07-13 18-04-29.mp4.gif)
 
 ## �🚀 Quick Start
 
@@ -198,11 +175,10 @@ FRONTEND_URL=http://localhost:3000
 
 | Game | Controls |
 |------|----------|
-| **Snake** | Arrow keys or WASD |
-| **Tetris** | Arrow keys, Space (rotate) |
-| **Breakout** | Arrow keys or mouse, Space (pause), R (restart) |
-| **Pong** | Arrow keys or WASD |
-| **All Games** | ESC (menu), R (restart) |
+| **Retro Game** | Arrow keys or WASD |
+| **Dominoes** | Mouse/touch |
+| **Towers of Hanoi** | Mouse/touch (Premium) |
+| **Tic-Tac-Toe** | Mouse/touch (Premium) |
 
 ## 📱 Mobile Support
 
@@ -223,8 +199,8 @@ retro-arcade/
 │   ├── arcade.html    # Game selection menu
 │   └── auth.js        # Authentication logic
 ├── games/             # Individual game files
-│   ├── snake.html
-│   ├── tetris.html
+│   ├── retro-game.html
+│   ├── dominoes.html
 │   └── ...
 ├── pages/             # Static pages
 │   ├── about-us.html
